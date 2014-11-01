@@ -10,8 +10,10 @@ public class ClientListener implements Runnable {
 	private ServerSocket serverSocket;
 	private final ExecutorService clients;
 	private boolean isStopped = false;
+	private CloudController controller;
 	
-	public ClientListener(ServerSocket serverSocket) {
+	public ClientListener(CloudController controller, ServerSocket serverSocket) {
+		this.controller = controller;
 		this.serverSocket = serverSocket;
 		clients =  Executors.newFixedThreadPool(4);
 	}
@@ -20,7 +22,7 @@ public class ClientListener implements Runnable {
 		while (!isStopped()) {
 			try {			
 				// TODO Spawn client handler thread
-				ClientHandler client = new ClientHandler(serverSocket.accept());
+				ClientHandler client = new ClientHandler(controller, serverSocket.accept());
 				clients.execute(client);
 				
 				if(isStopped()) {

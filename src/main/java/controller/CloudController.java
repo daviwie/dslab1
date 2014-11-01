@@ -161,7 +161,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 			listenerPool.execute(shell);
 			// TODO Spawn thread for UDP
 			// TODO Spawn thread for TCP
-			ClientListener cL = new ClientListener(serverSocket);
+			ClientListener cL = new ClientListener(this, serverSocket);
 			listenerPool.execute(cL);
 
 			if (isStopped()) {
@@ -253,6 +253,22 @@ public class CloudController implements ICloudControllerCli, Runnable {
 
 	private boolean isStopped() {
 		return isStopped;
+	}
+
+	public Config getUserConfig() {
+		return userConfig;
+	}
+
+	public ConcurrentHashMap<String, User> getUserMap() {
+		return userMap;
+	}
+
+	public ConcurrentHashMap<String, Node> getLiveNodes() {
+		return liveNodes;
+	}
+
+	public ConcurrentHashMap<String, Integer> getUsageStats() {
+		return usageStats;
 	}
 
 	/**

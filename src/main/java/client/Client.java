@@ -105,12 +105,12 @@ public class Client implements IClientCli, Runnable {
 			 * TODO Make sure cloud controller outputs "Successfully logged in."
 			 * or "Wrong username or password."
 			 */
-			userOutputWriter.println(username + "_" + password);
+			userOutputWriter.println("login_" + username + "_" + password);
 			String response = in.readLine();
 			if (response.equals("Successfully logged in.")) {
 				setLoggedIn(true);
 				setCurrentlyLoggedIn(username);
-				
+
 				return response;
 			} else
 				return response;
@@ -133,8 +133,8 @@ public class Client implements IClientCli, Runnable {
 			userOutputWriter.println("logout_" + getCurrentlyLoggedIn());
 			setCurrentlyLoggedIn(null);
 			setLoggedIn(false);
-			
-			return "Successfully logged out!";
+
+			return in.readLine();
 		}
 	}
 
@@ -148,9 +148,9 @@ public class Client implements IClientCli, Runnable {
 	@Command
 	public String credits() throws IOException {
 		if (isLoggedIn) {
-			userOutputWriter.println(getCurrentlyLoggedIn() + "_credits");
+			userOutputWriter.println("credits_" + getCurrentlyLoggedIn());
 			String response = "You have " + in.readLine() + " left.";
-			
+
 			return response;
 		} else
 			return "You must first log in!";
@@ -169,7 +169,7 @@ public class Client implements IClientCli, Runnable {
 		if (isLoggedIn) {
 			userOutputWriter.println("buy_" + getCurrentlyLoggedIn() + "_" + credits);
 			String response = "You now have " + in.readLine() + " credits.";
-			
+
 			return response;
 		} else
 			return "You must first log in!";
@@ -186,7 +186,7 @@ public class Client implements IClientCli, Runnable {
 	public String list() throws IOException {
 		if (isLoggedIn) {
 			userOutputWriter.println("list");
-			
+
 			return in.readLine();
 		} else
 			return "You must first log in!";
@@ -204,12 +204,13 @@ public class Client implements IClientCli, Runnable {
 	@Override
 	@Command
 	public String compute(String term) throws IOException {
+		// TODO Move validation to CloudController
 		if (isLoggedIn) {
 			if ((term.indexOf("/0") < 0) || (term.indexOf("/ 0") < 0))
 				return "Division by zero is not possible!";
 			else {
-				userOutputWriter.println(getCurrentlyLoggedIn() + "_" + term);
-				
+				userOutputWriter.println("compute_" + getCurrentlyLoggedIn() + "_" + term);
+
 				return in.readLine();
 			}
 		} else
@@ -225,6 +226,7 @@ public class Client implements IClientCli, Runnable {
 	@Override
 	@Command
 	public String exit() throws IOException {
+		logout();
 		socket.close();
 		shell.close();
 		userOutputWriter.close();

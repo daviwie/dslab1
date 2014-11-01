@@ -29,8 +29,14 @@ public class Node implements INodeCli, Runnable {
 	private String controllerHost;
 	private Integer controllerUdp;
 	private Integer nodeAlive;
+	
 	private String operators;
 	private char[] operatorA;
+	
+	private boolean add;
+	private boolean sub;
+	private boolean div;
+	private boolean mult;
 
 	private ArrayList<Operation> historyList;
 
@@ -58,6 +64,15 @@ public class Node implements INodeCli, Runnable {
 		controllerUdp = config.getInt("controller.udp.port");
 		nodeAlive = config.getInt("node.alive");
 		operators = config.getString("node.operators");
+		
+		if(operators.indexOf('+')>0)
+			add = true;
+		if(operators.indexOf('-')>0)
+			sub = true;
+		if(operators.indexOf('/')>0)
+			div = true;
+		if(operators.indexOf('*')>0)
+			mult = true;
 
 		operatorA = new char[operators.length()];
 		for (int i = 0; i < operators.length(); i++) {
@@ -70,6 +85,29 @@ public class Node implements INodeCli, Runnable {
 	@Override
 	public void run() {
 		new Thread(shell).start();
+	}
+	
+	public String calculate(Integer termA, String operator, Integer termB) {
+		Integer result = null;
+		
+		if(operator.equals("+") && supportsAdd()) {
+			result = termA + termB;
+		}
+		
+		if(operator.equals("-") && supportsSub()) {
+			result = termA - termB;
+		}
+		
+		if(operator.equals("/") && supportsDiv()) {
+			// TODO Handle rounding as per Angabe
+			result = termA / termB;
+		}
+		
+		if(operator.equals("*") && supportsMult()) {
+			result = termA * termB;
+		}
+		
+		return result.toString();
 	}
 
 	@Override
@@ -91,6 +129,22 @@ public class Node implements INodeCli, Runnable {
 		}
 		
 		return output;
+	}
+
+	public boolean supportsAdd() {
+		return add;
+	}
+
+	public boolean supportsSub() {
+		return sub;
+	}
+
+	public boolean supportsDiv() {
+		return div;
+	}
+
+	public boolean supportsMult() {
+		return mult;
 	}
 
 	/**

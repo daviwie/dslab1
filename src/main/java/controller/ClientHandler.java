@@ -5,18 +5,24 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientHandler implements Runnable {
 
+	private CloudController controller;
 	private Socket socket;
 	// Prepare the input reader for the socket
-	private BufferedReader reader; 
+	private BufferedReader reader;
 	// Prepare writer for responding to client requests
 	private PrintWriter writer;
 	// Client request
 	private String request;
 
-	public ClientHandler(Socket socket) {
+	public ClientHandler(CloudController controller, Socket socket) {
+		this.controller = controller;
 		this.setSocket(socket);
 		try {
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -32,7 +38,82 @@ public class ClientHandler implements Runnable {
 		try {
 			// Read client requests
 			while ((request = reader.readLine()) != null) {
-				
+				String parts[] = request.split("_");
+
+				if (request.startsWith("login")) {
+					synchronized (controller.getUserMap()) {
+						String username = parts[1];
+						String password = parts[2];
+
+						if (controller.getUserMap().containsKey(username)) {
+							if (controller.getUserMap().get(username).equals(password)) {
+								if (!controller.getUserMap().get(username).isOnline()) {
+									controller.getUserMap().get(username).setOnline(true);
+									writer.println("Successfully logged in.");
+								} else
+									writer.println("You are already logged in!");
+							} else
+								writer.println("Wrong username or password.");
+						} else
+							writer.println("Wrong username or password.");
+					}
+				}
+
+				if (request.startsWith("logout")) {
+					synchronized (controller.getUserMap()) {
+						String username = parts[1];
+
+						if (controller.getUserMap().get(username).isOnline()) {
+							controller.getUserMap().get(username).setOnline(false);
+							writer.println("Successfully logged out.");
+						} else
+							writer.println("You are not logged in.");
+					}
+
+				}
+
+				if (request.startsWith("credits")) {
+					synchronized (controller.getUserMap()) {
+						String username = parts[1];
+
+						writer.println(controller.getUserMap().get(username).getCredits());
+					}
+				}
+
+				if (request.startsWith("buy")) {
+					synchronized (controller.getUserMap()) {
+						String username = parts[1];
+						String credits = parts[2];
+
+						Integer oldCredits = controller.getUserMap().get(username).getCredits();
+						controller.getUserMap().get(username).setCredits(oldCredits + Integer.parseInt(credits));
+						writer.println(controller.getUserMap().get(username).getCredits());
+					}
+				}
+
+				if (request.startsWith("list")) {
+					// TODO
+				}
+
+				if (request.startsWith("compute")) {
+					synchronized (controller.getUsageStats()) {
+						Iterator<Entry<String, Integer>> it = controller.getUsageStats().entrySet().iterator();
+						ConcurrentHashMap.Entry<String, Integer> lowest = null;
+						
+						while (it.hasNext()) {
+							if (lowest == null)
+								lowest = (ConcurrentHashMap.Entry<String, Integer>) it.next();
+							else {
+								ConcurrentHashMap.Entry<String, Integer> pairs = (ConcurrentHashMap.Entry<String, Integer>) it.next();
+								if (pairs.getValue() < lowest.getValue()) {
+									lowest = pairs;
+								}
+							}
+						}
+						
+						// TODO Connect to lowest
+					}
+				}
 			}
 		} catch (IOException e) {
 			System.out.println("ERROR: " + e.getMessage());
