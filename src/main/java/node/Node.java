@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 
 import cli.Command;
 import cli.Shell;
@@ -17,14 +16,14 @@ public class Node implements INodeCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
-	
+
 	/*
 	 * Everything past this point in variables was not part of the original
 	 * class
 	 */
-	
+
 	private Shell shell;
-	
+
 	private String logDir;
 	private Integer tcpPort;
 	private String controllerHost;
@@ -32,8 +31,8 @@ public class Node implements INodeCli, Runnable {
 	private Integer nodeAlive;
 	private String operators;
 	private char[] operatorA;
-	
-	private ConcurrentHashMap<String, String> historyMap;
+
+	private ArrayList<Operation> historyList;
 
 	/**
 	 * @param componentName
@@ -45,13 +44,12 @@ public class Node implements INodeCli, Runnable {
 	 * @param userResponseStream
 	 *            the output stream to write the console output to
 	 */
-	public Node(String componentName, Config config,
-			InputStream userRequestStream, PrintStream userResponseStream) {
+	public Node(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
 		this.config = config;
 		this.userRequestStream = userRequestStream;
 		this.userResponseStream = userResponseStream;
-		
+
 		shell = new Shell(componentName, userRequestStream, userResponseStream);
 
 		logDir = config.getString("log.dir");
@@ -60,13 +58,13 @@ public class Node implements INodeCli, Runnable {
 		controllerUdp = config.getInt("controller.udp.port");
 		nodeAlive = config.getInt("node.alive");
 		operators = config.getString("node.operators");
-		
+
 		operatorA = new char[operators.length()];
-		for(int i = 0; i < operators.length(); i++) {
+		for (int i = 0; i < operators.length(); i++) {
 			operatorA[i] = operators.charAt(i);
 		}
-		
-		historyMap = new ConcurrentHashMap<String, String>();
+
+		historyList = new ArrayList<Operation>();
 	}
 
 	@Override
@@ -77,15 +75,22 @@ public class Node implements INodeCli, Runnable {
 	@Override
 	@Command
 	public String exit() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		shell.close();
+		userResponseStream.close();
+		userRequestStream.close();
+		return "Closing " + componentName + " down...";
 	}
 
 	@Override
 	@Command
 	public String history(int numberOfRequests) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		String output = "";
+		
+		for(int i = historyList.size()-1; i >= (historyList.size() - numberOfRequests);i--){
+			output += historyList.get(i).toString();
+		}
+		
+		return output;
 	}
 
 	/**
@@ -94,8 +99,7 @@ public class Node implements INodeCli, Runnable {
 	 *            which also represents the name of the configuration
 	 */
 	public static void main(String[] args) {
-		Node node = new Node(args[0], new Config(args[0]), System.in,
-				System.out);
+		Node node = new Node(args[0], new Config(args[0]), System.in, System.out);
 		new Thread(node).start();
 	}
 

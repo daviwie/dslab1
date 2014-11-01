@@ -205,6 +205,9 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	@Command
 	public synchronized String exit() throws IOException {
 		String output = "Shutting down " + componentName + " now, please wait...\n";
+		
+		userRequestStream.close();
+		userResponseStream.close();
 
 		// TODO Take care of shutting down the timer(s)
 		// TODO Shut down listeners
