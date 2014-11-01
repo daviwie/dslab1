@@ -244,18 +244,6 @@ public class Client implements IClientCli, Runnable {
 		new Thread(client).start();
 	}
 
-	public PrintWriter getUserOutputWriter() {
-		return userOutputWriter;
-	}
-
-	public BufferedReader getIn() {
-		return in;
-	}
-
-	public BufferedReader getStdIn() {
-		return stdIn;
-	}
-
 	// --- Commands needed for Lab 2. Please note that you do not have to
 	// implement them for the first submission. ---
 
