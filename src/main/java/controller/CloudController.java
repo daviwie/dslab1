@@ -41,11 +41,10 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	private final Config userConfig;
 
 	// Hashmap of all users stored in the config file along with their passwords
-	private ConcurrentHashMap<String, User> userMap;
+	private ConcurrentHashMap<String, UserData> userMap;
 
 	// Hashmaps of nodes
-	private ConcurrentHashMap<String, Node> liveNodes;
-	private ConcurrentHashMap<String, Node> deadNodes;
+	private ConcurrentHashMap<String, NodeData> nodes;
 	private ConcurrentHashMap<String, Integer> usageStats;
 
 	// Server utilities
@@ -67,7 +66,8 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	 * @param userResponseStream
 	 *            the output stream to write the console output to
 	 */
-	public CloudController(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
+	public CloudController(String componentName, Config config,
+			InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
 		this.controllerConfig = config;
 		this.userRequestStream = userRequestStream;
@@ -82,13 +82,12 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		/*
 		 * Initialize the user map
 		 */
-		userMap = new ConcurrentHashMap<String, User>();
+		userMap = new ConcurrentHashMap<String, UserData>();
 
 		/*
 		 * Initialize the node lists
 		 */
-		liveNodes = new ConcurrentHashMap<String, Node>();
-		deadNodes = new ConcurrentHashMap<String, Node>();
+		nodes = new ConcurrentHashMap<String, NodeData>();
 
 		/*
 		 * Read out all of the config information for the controller and
@@ -112,13 +111,14 @@ public class CloudController implements ICloudControllerCli, Runnable {
 			String userName = parts[0];
 			String attr = parts[1];
 			if (!userMap.containsKey(userName)) {
-				User user = new User();
+				UserData user = new UserData();
 				user.setName(userName);
 				switch (attr) {
 				case "credits":
 					user.setCredits(userConfig.getInt(userName + "." + attr));
 				case "password":
-					user.setPassword(userConfig.getString(userName + "." + attr));
+					user.setPassword(userConfig
+							.getString(userName + "." + attr));
 				default:
 					break;
 				}
@@ -127,9 +127,11 @@ public class CloudController implements ICloudControllerCli, Runnable {
 			} else {
 				switch (attr) {
 				case "credits":
-					userMap.get(userName).setCredits(userConfig.getInt(userName + "." + attr));
+					userMap.get(userName).setCredits(
+							userConfig.getInt(userName + "." + attr));
 				case "password":
-					userMap.get(userName).setPassword(userConfig.getString(userName + "." + attr));
+					userMap.get(userName).setPassword(
+							userConfig.getString(userName + "." + attr));
 				default:
 					break;
 				}
@@ -177,21 +179,37 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	@Override
 	@Command
 	public synchronized String nodes() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		Iterator<Entry<String, NodeData>> it = nodes.entrySet().iterator();
+		String output = "";
+
+		while (it.hasNext()) {
+			int counter = 1;
+			ConcurrentHashMap.Entry<String, NodeData> pairs = (ConcurrentHashMap.Entry<String, NodeData>) it
+					.next();
+			output += counter + ". " + pairs.getKey().toString() + "\n";
+
+			counter++;
+
+			it.remove();
+		}
+
+		return output;
 	}
 
 	@Override
 	@Command
 	public synchronized String users() throws IOException {
 		// http://stackoverflow.com/questions/1066589/java-iterate-through-hashmap
-		Iterator<Entry<String, User>> it = userMap.entrySet().iterator();
+		Iterator<Entry<String, UserData>> it = userMap.entrySet().iterator();
 		String output = "";
 
 		while (it.hasNext()) {
 			int counter = 1;
-			ConcurrentHashMap.Entry<String, User> pairs = (ConcurrentHashMap.Entry<String, User>) it.next();
-			output += counter + ". " + pairs.getKey() + " " + pairs.getValue().isOnline() + " Credits: " + pairs.getValue().getCredits() + "\n";
+			ConcurrentHashMap.Entry<String, UserData> pairs = (ConcurrentHashMap.Entry<String, UserData>) it
+					.next();
+			output += counter + ". " + pairs.getKey() + " "
+					+ pairs.getValue().isOnline() + " Credits: "
+					+ pairs.getValue().getCredits() + "\n";
 
 			counter++;
 
@@ -204,13 +222,13 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	@Override
 	@Command
 	public synchronized String exit() throws IOException {
-		String output = "Shutting down " + componentName + " now, please wait...\n";
-		
+		String output = "Shutting down " + componentName
+				+ " now, please wait...\n";
+
 		userRequestStream.close();
 		userResponseStream.close();
 
 		// TODO Take care of shutting down the timer(s)
-		// TODO Shut down listeners
 
 		isStopped = true;
 		/*
@@ -247,8 +265,11 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	 * 
 	 * @param node
 	 */
-	private void calcUsageStats(Node node, int digits) {
-		usageStats.put(node.getComponentName(), usageStats.get(node) + (50 * digits));
+	private void calcUsageStats(NodeData node, int digits) {
+		// Calc new usageStats for a node
+		usageStats.put(node.getName(), usageStats.get(node.getName()) + (50 * digits));
+		// Update the nodes with the new usageStats figure
+		nodes.get(node.getName()).setUsage(usageStats.get(node.getName()));
 	}
 
 	private boolean isStopped() {
@@ -259,12 +280,12 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		return userConfig;
 	}
 
-	public ConcurrentHashMap<String, User> getUserMap() {
+	public ConcurrentHashMap<String, UserData> getUserMap() {
 		return userMap;
 	}
 
-	public ConcurrentHashMap<String, Node> getLiveNodes() {
-		return liveNodes;
+	public ConcurrentHashMap<String, NodeData> getNodes() {
+		return nodes;
 	}
 
 	public ConcurrentHashMap<String, Integer> getUsageStats() {
@@ -277,7 +298,8 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	 *            component
 	 */
 	public static void main(String[] args) {
-		CloudController cloudController = new CloudController(args[0], new Config("controller"), System.in, System.out);
+		CloudController cloudController = new CloudController(args[0],
+				new Config("controller"), System.in, System.out);
 		new Thread(cloudController).start();
 	}
 

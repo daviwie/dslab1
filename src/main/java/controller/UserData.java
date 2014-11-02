@@ -1,17 +1,17 @@
 package controller;
 
-public class User {
+public class UserData {
 	
 	private String name;
 	private String password;
 	private Integer credits;
 	private boolean online;
 	
-	public User() {
+	public UserData() {
 		
 	}
 	
-	public User(String name, String password, Integer credits) {
+	public UserData(String name, String password, Integer credits) {
 		this.name = name;
 		this.password = password;
 		this.credits = credits;

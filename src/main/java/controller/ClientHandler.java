@@ -34,7 +34,6 @@ public class ClientHandler implements Runnable {
 
 	@Override
 	public void run() {
-		// TODO Handle client input
 		try {
 			// Read client requests
 			while ((request = reader.readLine()) != null) {
@@ -111,7 +110,9 @@ public class ClientHandler implements Runnable {
 							}
 						}
 						
-						// TODO Connect to lowest
+						synchronized(controller.getNodes()) {
+							// TODO Connect to lowest
+						}
 					}
 				}
 			}

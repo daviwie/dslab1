@@ -101,10 +101,6 @@ public class Client implements IClientCli, Runnable {
 		if (isLoggedIn) {
 			return "You are already logged in!";
 		} else {
-			/*
-			 * TODO Make sure cloud controller outputs "Successfully logged in."
-			 * or "Wrong username or password."
-			 */
 			userOutputWriter.println("login_" + username + "_" + password);
 			String response = in.readLine();
 			if (response.equals("Successfully logged in.")) {
@@ -236,19 +232,7 @@ public class Client implements IClientCli, Runnable {
 		userResponseStream.close();
 		return "Exiting now";
 	}
-
-	/**
-	 * @param args
-	 *            the first argument is the name of the {@link Client} component
-	 */
-	public static void main(String[] args) {
-		Client client = new Client(args[0], new Config("client"), System.in, System.out);
-		new Thread(client).start();
-	}
-
-	// --- Commands needed for Lab 2. Please note that you do not have to
-	// implement them for the first submission. ---
-
+	
 	public boolean isLoggedIn() {
 		return isLoggedIn;
 	}
@@ -264,6 +248,18 @@ public class Client implements IClientCli, Runnable {
 	public void setCurrentlyLoggedIn(String currentlyLoggedIn) {
 		this.currentlyLoggedIn = currentlyLoggedIn;
 	}
+
+	/**
+	 * @param args
+	 *            the first argument is the name of the {@link Client} component
+	 */
+	public static void main(String[] args) {
+		Client client = new Client(args[0], new Config("client"), System.in, System.out);
+		new Thread(client).start();
+	}
+
+	// --- Commands needed for Lab 2. Please note that you do not have to
+	// implement them for the first submission. ---
 
 	@Override
 	public String authenticate(String username) throws IOException {
