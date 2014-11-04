@@ -1,4 +1,4 @@
-package controller;
+package controller.persistence;
 
 public class UserData {
 	

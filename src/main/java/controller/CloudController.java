@@ -17,6 +17,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import controller.handler.ClientListener;
+import controller.persistence.NodeConcurrentHashMap;
+import controller.persistence.NodeData;
+import controller.persistence.UserConcurrentHashMap;
+import controller.persistence.UserData;
 import node.Node;
 import cli.Command;
 import cli.Shell;
@@ -41,18 +46,17 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	private final Config userConfig;
 
 	// Hashmap of all users stored in the config file along with their passwords
-	private ConcurrentHashMap<String, UserData> userMap;
+	private UserConcurrentHashMap userMap;
 
 	// Hashmaps of nodes
-	private ConcurrentHashMap<String, NodeData> nodes;
-	private ConcurrentHashMap<String, Integer> usageStats;
+	private NodeConcurrentHashMap nodeMap;
 
 	// Server utilities
 	ServerSocket serverSocket;
 	DatagramSocket datagramSocket;
 
 	// Thread pools
-	private final ExecutorService listenerPool;
+	private final ExecutorService pool;
 
 	private boolean isStopped = false;
 
@@ -66,28 +70,21 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	 * @param userResponseStream
 	 *            the output stream to write the console output to
 	 */
-	public CloudController(String componentName, Config config,
-			InputStream userRequestStream, PrintStream userResponseStream) {
+	public CloudController(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
 		this.controllerConfig = config;
 		this.userRequestStream = userRequestStream;
 		this.userResponseStream = userResponseStream;
 
 		/*
-		 * Set the shell for the controller
-		 */
-		shell = new Shell(componentName, userRequestStream, userResponseStream);
-		shell.register(this);
-
-		/*
 		 * Initialize the user map
 		 */
-		userMap = new ConcurrentHashMap<String, UserData>();
+		userMap = new UserConcurrentHashMap();
 
 		/*
 		 * Initialize the node lists
 		 */
-		nodes = new ConcurrentHashMap<String, NodeData>();
+		nodeMap = new NodeConcurrentHashMap();
 
 		/*
 		 * Read out all of the config information for the controller and
@@ -117,8 +114,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 				case "credits":
 					user.setCredits(userConfig.getInt(userName + "." + attr));
 				case "password":
-					user.setPassword(userConfig
-							.getString(userName + "." + attr));
+					user.setPassword(userConfig.getString(userName + "." + attr));
 				default:
 					break;
 				}
@@ -127,11 +123,9 @@ public class CloudController implements ICloudControllerCli, Runnable {
 			} else {
 				switch (attr) {
 				case "credits":
-					userMap.get(userName).setCredits(
-							userConfig.getInt(userName + "." + attr));
+					userMap.get(userName).setCredits(userConfig.getInt(userName + "." + attr));
 				case "password":
-					userMap.get(userName).setPassword(
-							userConfig.getString(userName + "." + attr));
+					userMap.get(userName).setPassword(userConfig.getString(userName + "." + attr));
 				default:
 					break;
 				}
@@ -141,7 +135,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		/*
 		 * Instantiate thread pools
 		 */
-		listenerPool = Executors.newFixedThreadPool(4);
+		pool = Executors.newCachedThreadPool();
 
 		/*
 		 * Instantiate ServerSocket and DatagramSocket
@@ -158,13 +152,19 @@ public class CloudController implements ICloudControllerCli, Runnable {
 
 	@Override
 	public void run() {
+		/*
+		 * Set the shell for the controller
+		 */
+		shell = new Shell(componentName, userRequestStream, userResponseStream);
+		shell.register(this);
+
 		while (!isStopped()) {
 			// TODO Spawn thread for Shell
-			listenerPool.execute(shell);
+			pool.execute(shell);
 			// TODO Spawn thread for UDP
 			// TODO Spawn thread for TCP
-			ClientListener cL = new ClientListener(this, serverSocket);
-			listenerPool.execute(cL);
+			ClientListener cL = new ClientListener(serverSocket, userMap, nodeMap, pool);
+			pool.execute(cL);
 
 			if (isStopped()) {
 				try {
@@ -178,52 +178,21 @@ public class CloudController implements ICloudControllerCli, Runnable {
 
 	@Override
 	@Command
-	public synchronized String nodes() throws IOException {
-		Iterator<Entry<String, NodeData>> it = nodes.entrySet().iterator();
-		String output = "";
-
-		while (it.hasNext()) {
-			int counter = 1;
-			ConcurrentHashMap.Entry<String, NodeData> pairs = (ConcurrentHashMap.Entry<String, NodeData>) it
-					.next();
-			output += counter + ". " + pairs.getKey().toString() + "\n";
-
-			counter++;
-
-			it.remove();
-		}
-
-		return output;
+	public String nodes() throws IOException {
+		// TODO
+		return null;
 	}
 
 	@Override
 	@Command
-	public synchronized String users() throws IOException {
-		// http://stackoverflow.com/questions/1066589/java-iterate-through-hashmap
-		Iterator<Entry<String, UserData>> it = userMap.entrySet().iterator();
-		String output = "";
-
-		while (it.hasNext()) {
-			int counter = 1;
-			ConcurrentHashMap.Entry<String, UserData> pairs = (ConcurrentHashMap.Entry<String, UserData>) it
-					.next();
-			output += counter + ". " + pairs.getKey() + " "
-					+ pairs.getValue().isOnline() + " Credits: "
-					+ pairs.getValue().getCredits() + "\n";
-
-			counter++;
-
-			it.remove();
-		}
-
-		return output;
+	public String users() throws IOException {
+		return null;
 	}
 
 	@Override
 	@Command
 	public synchronized String exit() throws IOException {
-		String output = "Shutting down " + componentName
-				+ " now, please wait...\n";
+		String output = "Shutting down " + componentName + " now, please wait...\n";
 
 		userRequestStream.close();
 		userResponseStream.close();
@@ -240,19 +209,19 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		/*
 		 * Disable new tasks from being submitted to either pool
 		 */
-		listenerPool.shutdown();
+		pool.shutdown();
 
 		try {
 			// Wait a while for existing tasks to terminate
-			if (!listenerPool.awaitTermination(60, TimeUnit.SECONDS)) {
-				listenerPool.shutdownNow(); // Cancel currently executing tasks
+			if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+				pool.shutdownNow(); // Cancel currently executing tasks
 				// Wait a while for tasks to respond to being cancelled
-				if (!listenerPool.awaitTermination(60, TimeUnit.SECONDS))
+				if (!pool.awaitTermination(60, TimeUnit.SECONDS))
 					output += "Client Pool did not terminate!\n";
 			}
 		} catch (InterruptedException e) {
 			// (Re-)cancel if current thread also interrupted
-			listenerPool.shutdownNow();
+			pool.shutdownNow();
 			// Preserve interrupt status
 			Thread.currentThread().interrupt();
 		}
@@ -260,36 +229,8 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		return output;
 	}
 
-	/**
-	 * Calculates the usage stats for a particular node
-	 * 
-	 * @param node
-	 */
-	private void calcUsageStats(NodeData node, int digits) {
-		// Calc new usageStats for a node
-		usageStats.put(node.getName(), usageStats.get(node.getName()) + (50 * digits));
-		// Update the nodes with the new usageStats figure
-		nodes.get(node.getName()).setUsage(usageStats.get(node.getName()));
-	}
-
 	private boolean isStopped() {
 		return isStopped;
-	}
-
-	public Config getUserConfig() {
-		return userConfig;
-	}
-
-	public ConcurrentHashMap<String, UserData> getUserMap() {
-		return userMap;
-	}
-
-	public ConcurrentHashMap<String, NodeData> getNodes() {
-		return nodes;
-	}
-
-	public ConcurrentHashMap<String, Integer> getUsageStats() {
-		return usageStats;
 	}
 
 	/**
@@ -298,8 +239,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	 *            component
 	 */
 	public static void main(String[] args) {
-		CloudController cloudController = new CloudController(args[0],
-				new Config("controller"), System.in, System.out);
+		CloudController cloudController = new CloudController(args[0], new Config("controller"), System.in, System.out);
 		new Thread(cloudController).start();
 	}
 
