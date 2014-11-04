@@ -30,6 +30,10 @@ public class NodeData {
 		this.online = true;
 		this.lastAlive = new Date().getTime();
 	}
+	
+	public String getKey() {
+		return getIpAddr() + ":" + getTcpPort();
+	}
 
 	/**
 	 * @return Get the IP Address of a node
@@ -58,7 +62,7 @@ public class NodeData {
 	 * 
 	 * @param usage
 	 */
-	public synchronized void incUsage(int usage) {
+	public synchronized void incUsage(Integer usage) {
 		this.usage += usage;
 	}
 

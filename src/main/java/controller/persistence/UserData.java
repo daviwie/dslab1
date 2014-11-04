@@ -50,6 +50,10 @@ public class UserData {
 		this.credits = credits;
 	}
 	
+	public void decCredits(long credits) {
+		this.credits -= credits;
+	}
+	
 	public void buyCredits(long credits) {
 		this.credits += credits;
 	}
