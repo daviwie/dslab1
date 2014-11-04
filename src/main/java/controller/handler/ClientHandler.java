@@ -5,15 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
-import controller.CloudController;
 import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.NodeData;
 import controller.persistence.UserConcurrentHashMap;
+import controller.persistence.UserData;
 
 public class ClientHandler implements Runnable {
 
@@ -26,6 +22,7 @@ public class ClientHandler implements Runnable {
 	private String request;
 	private UserConcurrentHashMap userMap;
 	private NodeConcurrentHashMap nodeMap;
+	private UserData user;
 
 	public ClientHandler(Socket socket, UserConcurrentHashMap userMap, NodeConcurrentHashMap nodeMap) {
 		this.socket = socket;
@@ -42,9 +39,9 @@ public class ClientHandler implements Runnable {
 			// Read client requests
 			while ((request = reader.readLine()) != null) {
 				String parts[] = request.split("_");
-				
-				switch(parts[0]) {
-				
+
+				switch (parts[0]) {
+
 				case "login":
 					writer.println(login(parts));
 				case "logout":
@@ -60,38 +57,80 @@ public class ClientHandler implements Runnable {
 				default:
 					writer.println("Unknown command, please try again with a known command");
 				}
-				
+
 			}
 		} catch (IOException e) {
 			System.out.println("ERROR: " + e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Attempts to log user into the system. If unsuccessful, an appropriate
+	 * error message is returned.
+	 * 
+	 * @param input
+	 *            user input split into an array of strings login_username_password
+	 * @return A message to the client that is output to the client's shell
+	 *         stating whether or not log in was successful
+	 */
 	private String login(String[] input) {
-		return null;
-		
+		return userMap.login(input[1], input[2]);
 	}
-	
+
+	/**
+	 * Attempts to log user out of the system. If unsuccessful, an appropriate
+	 * error message is returned.
+	 * 
+	 * @param input
+	 *            user input split into an array of strings logout_username
+	 * @return A message to the client that is output to the client's shell
+	 *         stating whether or not log out was successful
+	 */
 	private String logout(String[] input) {
-		return null;
+		return userMap.logout(input[1]);
 	}
-	
+
+	/**
+	 * Provides the client with the current amount of credits available for calculations. 
+	 * 
+	 * @param input user input split into an array of strings credits_username
+	 * @return The client's current credits
+	 */
 	private String credits(String[] input) {
-		return null;
+		return "You have " + userMap.get(input[1]).getCredits() + " credits.";
 	}
-	
-	private String buy(String[] inputs) {
-		return null;
+
+	/**
+	 * Adds a specific amount of credits to a user's account. 
+	 * 
+	 * @param input user input split into an array of strings buy_username_credits
+	 * @return The client's current credits
+	 */
+	private String buy(String[] input) {
+		userMap.get(input[1]).buyCredits(Long.parseLong(input[3]));
+		return "You now have " + userMap.get(input[1]).getCredits() + " credits.";
 	}
-	
+
+	/**
+	 * Lists all operations supported by the system
+	 * 
+	 * @param input user input split into an array of strings
+	 * @return all operations supported by the system
+	 */
 	private String list(String[] input) {
-		return null;
+		return nodeMap.getOperations();
 	}
-	
+
+	/**
+	 * Computes a formula as provided by the user.
+	 * 
+	 * @param input user input split into an array of strings compute_username_$TERM
+	 * @return the result of the calculation
+	 */
 	private String compute(String[] input) {
 		return null;
 	}
-	
+
 	private String sendToNode(NodeData node, String term) {
 		return null;
 	}

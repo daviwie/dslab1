@@ -2,17 +2,14 @@ package controller.handler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import controller.CloudController;
 import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.UserConcurrentHashMap;
 
 public class ClientListener implements Runnable {
 	private ServerSocket serverSocket;
-	private final ExecutorService clients;
+	private final ExecutorService pool;
 	private boolean isStopped = false;
 	private UserConcurrentHashMap userMap;
 	private NodeConcurrentHashMap nodeMap;
@@ -21,19 +18,20 @@ public class ClientListener implements Runnable {
 		this.serverSocket = serverSocket;
 		this.userMap = userMap;
 		this.nodeMap = nodeMap;
-		clients =  Executors.newFixedThreadPool(4);
+		this.pool =  pool;
 	}
 	
 	public void run() {		
 		while (!isStopped()) {
 			try {
 				ClientHandler client = new ClientHandler(serverSocket.accept(), userMap, nodeMap);
-				clients.execute(client);
+				pool.execute(client);
 				
 				if(isStopped()) {
 					close();
 				}
 			} catch (IOException e) {
+				setStopped(true);
 				System.out.println(e.getMessage());
 			}
 		}
@@ -48,9 +46,9 @@ public class ClientListener implements Runnable {
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			
+			// Not handled
 		}
-		clients.shutdownNow();
+		pool.shutdownNow();
 	}
 
 	public boolean isStopped() {

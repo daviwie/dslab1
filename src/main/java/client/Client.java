@@ -145,9 +145,8 @@ public class Client implements IClientCli, Runnable {
 	public String credits() throws IOException {
 		if (isLoggedIn) {
 			userOutputWriter.println("credits_" + getCurrentlyLoggedIn());
-			String response = "You have " + in.readLine() + " left.";
 
-			return response;
+			return in.readLine();
 		} else
 			return "You must first log in!";
 	}
@@ -164,9 +163,8 @@ public class Client implements IClientCli, Runnable {
 	public String buy(long credits) throws IOException {
 		if (isLoggedIn) {
 			userOutputWriter.println("buy_" + getCurrentlyLoggedIn() + "_" + credits);
-			String response = "You now have " + in.readLine() + " credits.";
 
-			return response;
+			return in.readLine();
 		} else
 			return "You must first log in!";
 	}

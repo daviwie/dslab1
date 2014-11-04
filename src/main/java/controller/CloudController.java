@@ -7,22 +7,16 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import controller.handler.ClientListener;
 import controller.persistence.NodeConcurrentHashMap;
-import controller.persistence.NodeData;
 import controller.persistence.UserConcurrentHashMap;
 import controller.persistence.UserData;
-import node.Node;
 import cli.Command;
 import cli.Shell;
 
@@ -55,7 +49,8 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	ServerSocket serverSocket;
 	DatagramSocket datagramSocket;
 
-	// Thread pools
+	// Thread pool
+	// TODO Declare pool as a Singleton?
 	private final ExecutorService pool;
 
 	private boolean isStopped = false;
@@ -104,12 +99,11 @@ public class CloudController implements ICloudControllerCli, Runnable {
 
 		for (String key : userKeys) {
 			String[] parts = key.split("\\.");
-			int test = parts.length;
 			String userName = parts[0];
 			String attr = parts[1];
 			if (!userMap.containsKey(userName)) {
 				UserData user = new UserData();
-				user.setName(userName);
+				user.setUserName(userName);
 				switch (attr) {
 				case "credits":
 					user.setCredits(userConfig.getInt(userName + "." + attr));
@@ -133,7 +127,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		}
 
 		/*
-		 * Instantiate thread pools
+		 * Instantiate thread pool
 		 */
 		pool = Executors.newCachedThreadPool();
 
@@ -153,27 +147,23 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	@Override
 	public void run() {
 		/*
+		 * Finish setup for CloudController. These instantiations are only
+		 * performed once we're getting underway and need to begin spawning
+		 * threads.
+		 */
+		ClientListener cL = new ClientListener(serverSocket, userMap, nodeMap, pool);
+		pool.execute(cL);
+		// TODO Spawn thread for UDP
+		// NodeUDPListener nL = new NodeUDPListener();
+		// TODO Spawn thread for Timer
+		// TODO Spawn thread for TimerTask
+
+		/*
 		 * Set the shell for the controller
 		 */
 		shell = new Shell(componentName, userRequestStream, userResponseStream);
 		shell.register(this);
-
-		while (!isStopped()) {
-			// TODO Spawn thread for Shell
-			pool.execute(shell);
-			// TODO Spawn thread for UDP
-			// TODO Spawn thread for TCP
-			ClientListener cL = new ClientListener(serverSocket, userMap, nodeMap, pool);
-			pool.execute(cL);
-
-			if (isStopped()) {
-				try {
-					exit();
-				} catch (IOException e) {
-
-				}
-			}
-		}
+		pool.execute(shell);
 	}
 
 	@Override

@@ -2,27 +2,36 @@ package controller.persistence;
 
 public class UserData {
 	
-	private String name;
+	private String userName;
 	private String password;
-	private Integer credits;
+	private long credits;
 	private boolean online;
 	
 	public UserData() {
 		
 	}
 	
-	public UserData(String name, String password, Integer credits) {
-		this.name = name;
+	/**
+	 * Creates a new user to be stored in UserConcurrentHashMap
+	 * 
+	 * @param userName The username used to log into the system
+	 * @param password The password used to log into the system
+	 * @param credits The credits necessary to compute formulas
+	 */
+	public UserData(String userName, String password, Integer credits) {
+		this.userName = userName;
 		this.password = password;
 		this.credits = credits;
 	}
 
-	public String getName() {
-		return name;
+	// TODO if(bored) fillInJavadocs else fuckIt
+	
+	public String getUserName() {
+		return userName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setUserName(String name) {
+		this.userName = name;
 	}
 
 	public String getPassword() {
@@ -33,12 +42,16 @@ public class UserData {
 		this.password = password;
 	}
 
-	public Integer getCredits() {
+	public long getCredits() {
 		return credits;
 	}
 
-	public void setCredits(Integer credits) {
+	public void setCredits(long credits) {
 		this.credits = credits;
+	}
+	
+	public void buyCredits(long credits) {
+		this.credits += credits;
 	}
 
 	public boolean isOnline() {

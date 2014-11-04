@@ -5,14 +5,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("serial")
 public class UserConcurrentHashMap extends ConcurrentHashMap<String, UserData> {
 	/**
-	 * Login a certain user. 
+	 * Login a certain user.
 	 * 
-	 * @param name the username of the client
-	 * @param password the password to match the username
+	 * @param userName
+	 *            the username of the client
+	 * @param password
+	 *            the password to match the username
 	 * @return A string signifying a successful or a failed login
 	 */
-	public synchronized String login(String name, String password) {
-		UserData user = get(name);
+	public synchronized String login(String userName, String password) {
+		UserData user = get(userName);
 
 		/*
 		 * In the event that login fails due to invalid username or password,
@@ -30,4 +32,22 @@ public class UserConcurrentHashMap extends ConcurrentHashMap<String, UserData> {
 			return "Successfully logged in.";
 		}
 	}
+	
+	public synchronized String logout(String userName) {
+		UserData user = get(userName);
+		
+		if(user == null) 
+			return "User not logged in!";
+		else if(!user.isOnline())
+			return "User not logged in!";
+		else {
+			get(userName).setOnline(false);
+			return "User successfully logged out!";
+		}
+	}
+	
+	public synchronized void updateUser(UserData user) {
+		put(user.getUserName(), user);
+	}
+
 }
