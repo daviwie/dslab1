@@ -65,4 +65,11 @@ public class UserData {
 	public void setOnline(boolean online) {
 		this.online = online;
 	}
+	
+	public String stringOnline() {
+		if(isOnline())
+			return "online";
+		else 
+			return "offline";
+	}
 }

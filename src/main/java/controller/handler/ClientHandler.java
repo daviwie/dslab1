@@ -204,7 +204,7 @@ public class ClientHandler implements Runnable {
 					 * Calculation failed, node set to offline and credits
 					 * decremented by 50 for failed operation
 					 */
-					nodeMap.get(node.getKey()).setOnline(false);
+					nodeMap.get(node.getKey()).setAlive(false);
 					usedCredits -= 50;
 				}
 

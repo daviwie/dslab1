@@ -32,22 +32,29 @@ public class UserConcurrentHashMap extends ConcurrentHashMap<String, UserData> {
 			return "Successfully logged in.";
 		}
 	}
-	
+
 	public synchronized String logout(String userName) {
 		UserData user = get(userName);
-		
-		if(user == null) 
+
+		if (user == null)
 			return "User not logged in!";
-		else if(!user.isOnline())
+		else if (!user.isOnline())
 			return "User not logged in!";
 		else {
 			get(userName).setOnline(false);
 			return "User successfully logged out!";
 		}
 	}
-	
-	public synchronized void updateUser(UserData user) {
-		put(user.getUserName(), user);
+
+	public String listUsers() {
+		int counter = 1;
+		String output = "";
+
+		for (String key : keySet()) {
+			output += counter + ". " + get(key).getUserName() + " " + get(key).stringOnline() + " Credits: " + get(key).getCredits() + "\n";
+		}
+
+		return output;
 	}
 
 }

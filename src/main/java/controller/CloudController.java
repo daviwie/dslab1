@@ -9,14 +9,17 @@ import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.Set;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import controller.handler.ClientListener;
+import controller.handler.NodeUDPListener;
 import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.UserConcurrentHashMap;
 import controller.persistence.UserData;
+import controller.timer.AliveTimerTask;
 import cli.Command;
 import cli.Shell;
 
@@ -45,15 +48,17 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	// Hashmaps of nodes
 	private NodeConcurrentHashMap nodeMap;
 
-	// Server utilities
-	ServerSocket serverSocket;
-	DatagramSocket datagramSocket;
-
 	// Thread pool
 	// TODO Declare pool as a Singleton?
 	private final ExecutorService pool;
 
-	private boolean isStopped = false;
+	// Server utilities
+	ServerSocket serverSocket;
+	DatagramSocket datagramSocket;
+
+	// Timer utilities
+	private Timer aliveTimer;
+	private AliveTimerTask aliveTimerTask;
 
 	/**
 	 * @param componentName
@@ -142,6 +147,9 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		} catch (IOException e) {
 			System.out.println("ERROR: " + e.getMessage());
 		}
+
+		aliveTimer = new Timer();
+		aliveTimerTask = new AliveTimerTask(nodeMap, nodeTimeout);
 	}
 
 	@Override
@@ -151,15 +159,23 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		 * performed once we're getting underway and need to begin spawning
 		 * threads.
 		 */
+
+		// Spawn ClientListener
 		ClientListener cL = new ClientListener(serverSocket, userMap, nodeMap, pool);
 		pool.execute(cL);
-		// TODO Spawn thread for UDP
-		// NodeUDPListener nL = new NodeUDPListener();
-		// TODO Spawn thread for Timer
-		// TODO Spawn thread for TimerTask
+
+		// Spawn NodeUDPListener
+		NodeUDPListener nL = new NodeUDPListener(datagramSocket, nodeMap);
+		pool.execute(nL);
+
+		// Start timer
+		aliveTimer.scheduleAtFixedRate(aliveTimerTask, 0, nodeCheckPeriod);
 
 		/*
-		 * Set the shell for the controller
+		 * Set the shell for the controller last so that way the program can go
+		 * ahead and immediately start listening for connections. Other
+		 * implementation with shell at the start of run seemed to cause strange
+		 * behavior.
 		 */
 		shell = new Shell(componentName, userRequestStream, userResponseStream);
 		shell.register(this);
@@ -169,32 +185,40 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	@Override
 	@Command
 	public String nodes() throws IOException {
-		// TODO
-		return null;
+		return nodeMap.listNodes();
 	}
 
 	@Override
 	@Command
 	public String users() throws IOException {
-		return null;
+		return userMap.listUsers();
 	}
 
+	/**
+	 * Shuts down everything in reverse order that it was declared
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	@Override
 	@Command
 	public synchronized String exit() throws IOException {
 		String output = "Shutting down " + componentName + " now, please wait...\n";
 
-		userRequestStream.close();
-		userResponseStream.close();
+		/*
+		 * Shut down the timer and the task
+		 */
+		aliveTimer.cancel();
+		aliveTimerTask.cancel();
 
-		// TODO Take care of shutting down the timer(s)
-
-		isStopped = true;
 		/*
 		 * Shut down the sockets used for receiving connections
 		 */
 		serverSocket.close();
 		datagramSocket.close();
+
+		userRequestStream.close();
+		userResponseStream.close();
 
 		/*
 		 * Disable new tasks from being submitted to either pool
@@ -217,10 +241,6 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		}
 
 		return output;
-	}
-
-	private boolean isStopped() {
-		return isStopped;
 	}
 
 	/**

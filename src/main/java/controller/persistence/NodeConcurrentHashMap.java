@@ -32,7 +32,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 			put(id, new NodeData(ipAddr, tcpPort, operations));
 		else {
 			node.setOperations(parseOperations("", operations));
-			node.setOnline(true);
+			node.setAlive(true);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 		for (String key : keySet()) {
 			NodeData temp = get(key);
 
-			if (temp.isOnline()) {
+			if (temp.isAlive()) {
 				result = parseOperations(result, temp.getOperations());
 			}
 		}
@@ -91,7 +91,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 		for (String key : keySet()) {
 			NodeData temp = get(key);
 
-			if (temp.isOnline() && temp.getOperations().contains(operation)) {
+			if (temp.isAlive() && temp.getOperations().contains(operation)) {
 				if (result == null) {
 					result = temp;
 				} else if (temp.getUsage() < result.getUsage()) {
@@ -113,7 +113,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	 *            The maximum amount of time (in milliseconds) since a Node's
 	 *            lastAlive attribute
 	 */
-	public void updateNodeAvailability(long timeoutPeriod) {
+	public void updateNodeAlive(long timeoutPeriod) {
 		/*
 		 * Empty java.util.Date constructor initializes with the current
 		 * date/time in milliseconds
@@ -125,9 +125,23 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 
 			// TODO Use Date.before/after methods for better readability?
 			if (temp.getLastAlive() + timeoutPeriod <= currentTime) {
-				temp.setOnline(false);
+				temp.setAlive(false);
 			}
 		}
+	}
+	
+	public String listNodes() {
+		int counter = 1;
+		String output = "";
+
+		for (String key : keySet()) {
+			NodeData node = get(key);
+			output += counter + ". IP: " + node.getIpAddr() + "Port: " + node.getTcpPort() + " " + node.stringAlive() + " Usage: " + node.getUsage()
+					+ "\n";
+			counter++;
+		}
+		
+		return output;
 	}
 
 }

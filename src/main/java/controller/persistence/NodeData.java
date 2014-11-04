@@ -9,7 +9,7 @@ public class NodeData {
 	// Initially zero
 	private Integer usage;
 	// Always true when first created after receiving UDP datagram
-	private boolean online;
+	private boolean alive;
 	private String operations;
 	// Time in milliseconds
 	// TODO Switch to java.util.Date?
@@ -27,7 +27,7 @@ public class NodeData {
 		this.tcpPort = tcpPort;
 		this.operations = operations;
 		this.usage = 0;
-		this.online = true;
+		this.alive = true;
 		this.lastAlive = new Date().getTime();
 	}
 	
@@ -79,26 +79,26 @@ public class NodeData {
 	/**
 	 * @return true if online, else false
 	 */
-	public synchronized boolean isOnline() {
-		return online;
+	public synchronized boolean isAlive() {
+		return alive;
 	}
 
 	/**
 	 * Updates the node to be online or offline. If the parameter is true then
 	 * the lastAlive is updated with the current Date in milliseconds.
 	 * 
-	 * @param online
+	 * @param alive
 	 *            if online true, else false
 	 */
-	public synchronized void setOnline(boolean online) {
+	public synchronized void setAlive(boolean alive) {
 		/*
 		 * Empty java.util.Date constructor initializes with the current
 		 * date/time in milliseconds
 		 */
-		if (online)
+		if (alive)
 			this.lastAlive = new Date().getTime();
 
-		this.online = online;
+		this.alive = alive;
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class NodeData {
 	 */
 	public synchronized String stringAlive() {
 		// TODO Set to private?
-		if (isOnline())
+		if (isAlive())
 			return "online";
 		else
 			return "offline";
