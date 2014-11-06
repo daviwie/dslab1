@@ -14,11 +14,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import controller.handler.ClientListener;
-import controller.handler.NodeUDPListener;
+import controller.container.UserData;
+import controller.listener.ClientListener;
+import controller.listener.NodeUDPListener;
 import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.UserConcurrentHashMap;
-import controller.persistence.UserData;
 import controller.timer.AliveTimerTask;
 import cli.Command;
 import cli.Shell;
@@ -231,7 +231,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 				pool.shutdownNow(); // Cancel currently executing tasks
 				// Wait a while for tasks to respond to being cancelled
 				if (!pool.awaitTermination(60, TimeUnit.SECONDS))
-					output += "Client Pool did not terminate!\n";
+					output += "FATAL: Client Pool did not terminate!\n";
 			}
 		} catch (InterruptedException e) {
 			// (Re-)cancel if current thread also interrupted

@@ -7,8 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import controller.container.NodeData;
 import controller.persistence.NodeConcurrentHashMap;
-import controller.persistence.NodeData;
 import controller.persistence.UserConcurrentHashMap;
 
 public class ClientHandler implements Runnable {

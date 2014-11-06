@@ -2,6 +2,8 @@ package controller.persistence;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import controller.container.UserData;
+
 @SuppressWarnings("serial")
 public class UserConcurrentHashMap extends ConcurrentHashMap<String, UserData> {
 	/**

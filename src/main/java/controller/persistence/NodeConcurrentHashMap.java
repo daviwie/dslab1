@@ -3,6 +3,8 @@ package controller.persistence;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
+import controller.container.NodeData;
+
 @SuppressWarnings("serial")
 public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	private final String operations = "+-*/";

@@ -5,8 +5,13 @@ import util.Config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import node.container.NodeAttr;
+import node.listener.ControllerListener;
 import cli.Command;
 import cli.Shell;
 
@@ -21,7 +26,6 @@ public class Node implements INodeCli, Runnable {
 	 * Everything past this point in variables was not part of the original
 	 * class
 	 */
-
 	private Shell shell;
 
 	private String logDir;
@@ -29,16 +33,14 @@ public class Node implements INodeCli, Runnable {
 	private String controllerHost;
 	private Integer controllerUdp;
 	private Integer nodeAlive;
-	
+
 	private String operators;
 	private char[] operatorA;
-	
-	private boolean add;
-	private boolean sub;
-	private boolean div;
-	private boolean mult;
 
 	private ArrayList<Operation> historyList;
+	private ExecutorService pool;
+	private NodeAttr node;
+	private ServerSocket serverSocket;
 
 	/**
 	 * @param componentName
@@ -56,23 +58,15 @@ public class Node implements INodeCli, Runnable {
 		this.userRequestStream = userRequestStream;
 		this.userResponseStream = userResponseStream;
 
-		shell = new Shell(componentName, userRequestStream, userResponseStream);
-
 		logDir = config.getString("log.dir");
 		tcpPort = config.getInt("tcp.port");
 		controllerHost = config.getString("controller.host");
 		controllerUdp = config.getInt("controller.udp.port");
 		nodeAlive = config.getInt("node.alive");
 		operators = config.getString("node.operators");
-		
-		if(operators.indexOf('+')>0)
-			add = true;
-		if(operators.indexOf('-')>0)
-			sub = true;
-		if(operators.indexOf('/')>0)
-			div = true;
-		if(operators.indexOf('*')>0)
-			mult = true;
+
+		node = new NodeAttr(Integer.parseInt(componentName.substring(componentName.length() - 1)), operators, logDir, tcpPort, controllerHost,
+				controllerUdp, nodeAlive);
 
 		operatorA = new char[operators.length()];
 		for (int i = 0; i < operators.length(); i++) {
@@ -80,34 +74,18 @@ public class Node implements INodeCli, Runnable {
 		}
 
 		historyList = new ArrayList<Operation>();
+
+		pool = Executors.newCachedThreadPool();
 	}
 
 	@Override
 	public void run() {
+		ControllerListener cL = new ControllerListener(serverSocket, pool, node);
+		pool.execute(cL);
+		
+		shell = new Shell(componentName, userRequestStream, userResponseStream);
+		shell.register(this);
 		new Thread(shell).start();
-	}
-	
-	public String calculate(Integer termA, String operator, Integer termB) {
-		Integer result = null;
-		
-		if(operator.equals("+") && supportsAdd()) {
-			result = termA + termB;
-		}
-		
-		if(operator.equals("-") && supportsSub()) {
-			result = termA - termB;
-		}
-		
-		if(operator.equals("/") && supportsDiv()) {
-			// TODO Handle rounding as per Angabe
-			result = termA / termB;
-		}
-		
-		if(operator.equals("*") && supportsMult()) {
-			result = termA * termB;
-		}
-		
-		return result.toString();
 	}
 
 	@Override
@@ -123,28 +101,12 @@ public class Node implements INodeCli, Runnable {
 	@Command
 	public String history(int numberOfRequests) throws IOException {
 		String output = "";
-		
-		for(int i = historyList.size()-1; i >= (historyList.size() - numberOfRequests);i--){
+
+		for (int i = historyList.size() - 1; i >= (historyList.size() - numberOfRequests); i--) {
 			output += historyList.get(i).toString();
 		}
-		
+
 		return output;
-	}
-
-	public boolean supportsAdd() {
-		return add;
-	}
-
-	public boolean supportsSub() {
-		return sub;
-	}
-
-	public boolean supportsDiv() {
-		return div;
-	}
-
-	public boolean supportsMult() {
-		return mult;
 	}
 
 	/**
