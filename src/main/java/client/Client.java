@@ -15,6 +15,7 @@ import util.Config;
 public class Client implements IClientCli, Runnable {
 
 	private String componentName;
+	@SuppressWarnings("unused")
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
@@ -25,9 +26,8 @@ public class Client implements IClientCli, Runnable {
 	private Integer controllerTcpPort;
 
 	private Socket socket = null;
-	private PrintWriter userOutputWriter = null;
+	private PrintWriter out = null;
 	private BufferedReader in = null;
-	private BufferedReader stdIn = null;
 
 	private boolean isLoggedIn = false;
 	private String currentlyLoggedIn = null;
@@ -48,9 +48,6 @@ public class Client implements IClientCli, Runnable {
 		this.userRequestStream = userRequestStream;
 		this.userResponseStream = userResponseStream;
 
-		shell = new Shell(componentName, userRequestStream, userResponseStream);
-		shell.register(this);
-
 		this.controllerHost = config.getString("controller.host");
 		this.controllerTcpPort = config.getInt("controller.tcp.port");
 
@@ -63,15 +60,11 @@ public class Client implements IClientCli, Runnable {
 			/*
 			 * Writes the actual user output to the socket.
 			 */
-			userOutputWriter = new PrintWriter(socket.getOutputStream(), true);
+			out = new PrintWriter(socket.getOutputStream(), true);
 			/*
 			 * Readers the socket/server's output.
 			 */
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			/*
-			 * Reads user cmd line input.
-			 */
-			stdIn = new BufferedReader(new InputStreamReader(userRequestStream));
 		} catch (IOException e) {
 			System.out.println("CLIENT ERROR: " + e.getMessage());
 		}
@@ -79,6 +72,8 @@ public class Client implements IClientCli, Runnable {
 
 	@Override
 	public void run() {
+		shell = new Shell(componentName, userRequestStream, userResponseStream);
+		shell.register(this);
 		new Thread(shell).start();
 	}
 
@@ -101,7 +96,7 @@ public class Client implements IClientCli, Runnable {
 		if (isLoggedIn) {
 			return "You are already logged in!";
 		} else {
-			userOutputWriter.println("login_" + username + "_" + password);
+			out.println("login_" + username + "_" + password);
 			String response = in.readLine();
 			if (response.equals("Successfully logged in.")) {
 				setLoggedIn(true);
@@ -126,7 +121,7 @@ public class Client implements IClientCli, Runnable {
 		if (!isLoggedIn) {
 			return "You are not logged in!";
 		} else {
-			userOutputWriter.println("logout_" + getCurrentlyLoggedIn());
+			out.println("logout_" + getCurrentlyLoggedIn());
 			setCurrentlyLoggedIn(null);
 			setLoggedIn(false);
 
@@ -144,7 +139,7 @@ public class Client implements IClientCli, Runnable {
 	@Command
 	public String credits() throws IOException {
 		if (isLoggedIn) {
-			userOutputWriter.println("credits_" + getCurrentlyLoggedIn());
+			out.println("credits_" + getCurrentlyLoggedIn());
 
 			return in.readLine();
 		} else
@@ -162,7 +157,7 @@ public class Client implements IClientCli, Runnable {
 	@Command
 	public String buy(long credits) throws IOException {
 		if (isLoggedIn) {
-			userOutputWriter.println("buy_" + getCurrentlyLoggedIn() + "_" + credits);
+			out.println("buy_" + getCurrentlyLoggedIn() + "_" + credits);
 
 			return in.readLine();
 		} else
@@ -179,7 +174,7 @@ public class Client implements IClientCli, Runnable {
 	@Command
 	public String list() throws IOException {
 		if (isLoggedIn) {
-			userOutputWriter.println("list");
+			out.println("list");
 
 			return in.readLine();
 		} else
@@ -203,7 +198,7 @@ public class Client implements IClientCli, Runnable {
 			if ((term.indexOf("/0") < 0) || (term.indexOf("/ 0") < 0))
 				return "Division by zero is not possible!";
 			else {
-				userOutputWriter.println("compute_" + getCurrentlyLoggedIn() + "_" + term);
+				out.println("compute_" + getCurrentlyLoggedIn() + "_" + term);
 
 				return in.readLine();
 			}
@@ -223,9 +218,8 @@ public class Client implements IClientCli, Runnable {
 		logout();
 		socket.close();
 		shell.close();
-		userOutputWriter.close();
+		out.close();
 		in.close();
-		stdIn.close();
 		userRequestStream.close();
 		userResponseStream.close();
 		return "Exiting now";
