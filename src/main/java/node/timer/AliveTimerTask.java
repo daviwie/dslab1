@@ -14,17 +14,18 @@ public class AliveTimerTask extends TimerTask {
 	private InetAddress inetAddr;
 	private Integer port;
 
-	public AliveTimerTask(String controllerHost, Integer port, String operations) {
+	public AliveTimerTask(DatagramSocket datagramSocket, String controllerHost, Integer port, String operations) {
 		this.port = port;
+		this.datagramSocket = datagramSocket;
 		message = "alive " + port + " " + operations;
-		try {
+		/*try {
 			inetAddr = InetAddress.getByName(controllerHost);
 			datagramSocket = new DatagramSocket(port, inetAddr);
 		} catch (SocketException e) {
 			System.out.println(e.getMessage());
 		} catch (UnknownHostException e) {
 			System.out.println(e.getMessage());
-		}
+		}*/
 	}
 
 	@Override

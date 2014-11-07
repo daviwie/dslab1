@@ -5,7 +5,11 @@ import util.Config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,8 +83,21 @@ public class Node implements INodeCli, Runnable {
 
 		pool = Executors.newCachedThreadPool();
 		
+		InetAddress inetAddr = null;
+		DatagramSocket datagramSocket = null;
+		try {
+			inetAddr = InetAddress.getByName(controllerHost);
+			datagramSocket = new DatagramSocket(controllerUdp, inetAddr);
+		} catch (UnknownHostException e) {
+			System.out.println("ERROR in Node Constructor!");
+			System.out.println(e.getMessage());
+		} catch (SocketException e) {
+			System.out.println("ERROR in Node Constructor!");
+			System.out.println(e.getMessage());
+		}
+		
 		aliveTimer = new Timer();
-		aliveTimerTask = new AliveTimerTask(controllerHost, controllerUdp, operators);
+		aliveTimerTask = new AliveTimerTask(datagramSocket, controllerHost, controllerUdp, operators);
 	}
 
 	@Override
