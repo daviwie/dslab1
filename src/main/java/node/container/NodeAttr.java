@@ -3,7 +3,7 @@ package node.container;
 import java.util.ArrayList;
 
 public class NodeAttr {
-	private final String operations;
+	private final String operators;
 	private final String fileDir;
 	private final Integer number;
 	private final Integer tcpPort;
@@ -12,9 +12,9 @@ public class NodeAttr {
 	private final long nodeALive;
 	private ArrayList<String> history;
 
-	public NodeAttr(Integer number, String operations, String fileDir, Integer tcpPort, String controllerHost, Integer controllerUdp,
+	public NodeAttr(Integer number, String operators, String fileDir, Integer tcpPort, String controllerHost, Integer controllerUdp,
 			long nodeAlive) {
-		this.operations = operations;
+		this.operators = operators;
 		this.fileDir = fileDir;
 		this.number = number;
 		this.tcpPort = tcpPort;
@@ -28,8 +28,8 @@ public class NodeAttr {
 		return number;
 	}
 
-	public String getOperations() {
-		return operations;
+	public String getOperators() {
+		return operators;
 	}
 
 	public String getFileDir() {

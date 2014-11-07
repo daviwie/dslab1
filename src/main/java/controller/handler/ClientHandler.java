@@ -186,7 +186,7 @@ public class ClientHandler implements Runnable {
 				String tempResult = null;
 
 				try {
-					tempResult = sendToNode(node, "compute_" + cursor + " " + termParts[i] + " " + termParts[i + 1]);
+					tempResult = sendToNode(node, "compute_" + cursor + "_" + termParts[i] + "_" + termParts[i + 1]);
 				} catch (IOException e) {
 					// TODO Handle node failure - rollback?
 				}

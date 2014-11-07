@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
-import java.util.ArrayList;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import node.container.NodeAttr;
 import node.listener.ControllerListener;
+import node.timer.AliveTimerTask;
 import cli.Command;
 import cli.Shell;
 
@@ -32,15 +34,17 @@ public class Node implements INodeCli, Runnable {
 	private Integer tcpPort;
 	private String controllerHost;
 	private Integer controllerUdp;
-	private Integer nodeAlive;
+	private long nodeAlive;
 
 	private String operators;
 	private char[] operatorA;
 
-	private ArrayList<Operation> historyList;
 	private ExecutorService pool;
 	private NodeAttr node;
 	private ServerSocket serverSocket;
+	
+	private Timer aliveTimer;
+	private AliveTimerTask aliveTimerTask;
 
 	/**
 	 * @param componentName
@@ -73,15 +77,18 @@ public class Node implements INodeCli, Runnable {
 			operatorA[i] = operators.charAt(i);
 		}
 
-		historyList = new ArrayList<Operation>();
-
 		pool = Executors.newCachedThreadPool();
+		
+		aliveTimer = new Timer();
+		aliveTimerTask = new AliveTimerTask(controllerHost, controllerUdp, operators);
 	}
 
 	@Override
 	public void run() {
 		ControllerListener cL = new ControllerListener(serverSocket, pool, node);
 		pool.execute(cL);
+		
+		aliveTimer.scheduleAtFixedRate(aliveTimerTask, 0, nodeAlive);
 		
 		shell = new Shell(componentName, userRequestStream, userResponseStream);
 		shell.register(this);
@@ -91,10 +98,36 @@ public class Node implements INodeCli, Runnable {
 	@Override
 	@Command
 	public String exit() throws IOException {
+		String output = "";
+		
+		aliveTimer.cancel();
+		
 		shell.close();
+		serverSocket.close();
 		userResponseStream.close();
 		userRequestStream.close();
-		return "Closing " + componentName + " down...";
+		
+		/*
+		 * Disable new tasks from being submitted to either pool
+		 */
+		pool.shutdown();
+
+		try {
+			// Wait a while for existing tasks to terminate
+			if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+				pool.shutdownNow(); // Cancel currently executing tasks
+				// Wait a while for tasks to respond to being cancelled
+				if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+					output += "FATAL: Client Pool did not terminate!\n";
+			}
+		} catch (InterruptedException e) {
+			// (Re-)cancel if current thread also interrupted
+			pool.shutdownNow();
+			// Preserve interrupt status
+			Thread.currentThread().interrupt();
+		}
+		
+		return output + "Closing " + componentName + " down...";
 	}
 
 	@Override
@@ -102,8 +135,8 @@ public class Node implements INodeCli, Runnable {
 	public String history(int numberOfRequests) throws IOException {
 		String output = "";
 
-		for (int i = historyList.size() - 1; i >= (historyList.size() - numberOfRequests); i--) {
-			output += historyList.get(i).toString();
+		for (int i = node.getHistory().size() - 1; i >= (node.getHistory().size() - numberOfRequests); i--) {
+			output += node.getHistory().get(i) + "\n";
 		}
 
 		return output;
@@ -126,10 +159,6 @@ public class Node implements INodeCli, Runnable {
 	public String resources() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	public String getComponentName() {
-		return componentName;
 	}
 
 }

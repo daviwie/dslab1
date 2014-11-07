@@ -22,6 +22,10 @@ public class ClientListener implements Runnable {
 		this.pool =  pool;
 	}
 	
+	private boolean isStopped() {
+		return isStopped;
+	}
+
 	public void run() {		
 		while (!isStopped()) {
 			try {
@@ -32,7 +36,7 @@ public class ClientListener implements Runnable {
 					close();
 				}
 			} catch (IOException e) {
-				setStopped(true);
+				isStopped = true;
 				System.out.println(e.getMessage());
 			}
 		}
@@ -50,14 +54,6 @@ public class ClientListener implements Runnable {
 			// Not handled
 		}
 		pool.shutdownNow();
-	}
-
-	public boolean isStopped() {
-		return isStopped;
-	}
-
-	public void setStopped(boolean isStopped) {
-		this.isStopped = isStopped;
 	}
 	
 }
