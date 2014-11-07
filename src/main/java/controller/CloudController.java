@@ -109,25 +109,12 @@ public class CloudController implements ICloudControllerCli, Runnable {
 			if (!userMap.containsKey(userName)) {
 				UserData user = new UserData();
 				user.setUserName(userName);
-				switch (attr) {
-				case "credits":
-					user.setCredits(userConfig.getInt(userName + "." + attr));
-				case "password":
-					user.setPassword(userConfig.getString(userName + "." + attr));
-				default:
-					break;
-				}
-
+				user.setCredits(userConfig.getInt(userName + "." + attr));
+				user.setPassword(userConfig.getString(userName + "." + attr));
 				userMap.put(userName, user);
 			} else {
-				switch (attr) {
-				case "credits":
-					userMap.get(userName).setCredits(userConfig.getInt(userName + "." + attr));
-				case "password":
-					userMap.get(userName).setPassword(userConfig.getString(userName + "." + attr));
-				default:
-					break;
-				}
+				userMap.get(userName).setCredits(userConfig.getInt(userName + "." + attr));
+				userMap.get(userName).setPassword(userConfig.getString(userName + "." + attr));
 			}
 		}
 
