@@ -12,7 +12,6 @@ public class NodeData {
 	private boolean alive;
 	private String operations;
 	// Time in milliseconds
-	// TODO Switch to java.util.Date?
 	private long lastAlive;
 
 	/**
@@ -108,7 +107,6 @@ public class NodeData {
 	 * @return A string representation of a node's alive/dead state
 	 */
 	public synchronized String stringAlive() {
-		// TODO Set to private?
 		if (isAlive())
 			return "online";
 		else

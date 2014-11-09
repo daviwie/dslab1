@@ -47,7 +47,6 @@ public class ClientListener implements Runnable {
 	}
 	
 	public void close() {
-		// TODO Shut down the listener and its thread pool
 		try {
 			serverSocket.close();
 		} catch (IOException e) {

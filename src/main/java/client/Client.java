@@ -193,15 +193,9 @@ public class Client implements IClientCli, Runnable {
 	@Override
 	@Command
 	public String compute(String term) throws IOException {
-		// TODO Move validation to CloudController
 		if (isLoggedIn) {
-			if ((term.indexOf("/0") < 0) || (term.indexOf("/ 0") < 0))
-				return "Division by zero is not possible!";
-			else {
-				out.println("compute_" + getCurrentlyLoggedIn() + "_" + term);
-
-				return in.readLine();
-			}
+			out.println("compute_" + getCurrentlyLoggedIn() + "_" + term);
+			return in.readLine();
 		} else
 			return "You must first log in!";
 	}
@@ -224,19 +218,35 @@ public class Client implements IClientCli, Runnable {
 		userResponseStream.close();
 		return "Exiting now";
 	}
-	
+
+	/**
+	 * @return true if logged in, else false
+	 */
 	public boolean isLoggedIn() {
 		return isLoggedIn;
 	}
 
+	/**
+	 * Sets whether a client is logged into a current session or not
+	 * 
+	 * @param isLoggedIn
+	 */
 	public void setLoggedIn(boolean isLoggedIn) {
 		this.isLoggedIn = isLoggedIn;
 	}
 
+	/**
+	 * @return the username of the currently logged in client
+	 */
 	public String getCurrentlyLoggedIn() {
 		return currentlyLoggedIn;
 	}
 
+	/**
+	 * Sets the username of the currently logged in client
+	 * 
+	 * @param currentlyLoggedIn
+	 */
 	public void setCurrentlyLoggedIn(String currentlyLoggedIn) {
 		this.currentlyLoggedIn = currentlyLoggedIn;
 	}

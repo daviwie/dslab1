@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.TimerTask;
 
 public class AliveTimerTask extends TimerTask {
@@ -18,14 +16,6 @@ public class AliveTimerTask extends TimerTask {
 		this.port = port;
 		this.datagramSocket = datagramSocket;
 		message = "alive " + port + " " + operations;
-		/*try {
-			inetAddr = InetAddress.getByName(controllerHost);
-			datagramSocket = new DatagramSocket(port, inetAddr);
-		} catch (SocketException e) {
-			System.out.println(e.getMessage());
-		} catch (UnknownHostException e) {
-			System.out.println(e.getMessage());
-		}*/
 	}
 
 	@Override

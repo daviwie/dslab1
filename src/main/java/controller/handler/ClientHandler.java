@@ -188,7 +188,7 @@ public class ClientHandler implements Runnable {
 				try {
 					tempResult = sendToNode(node, "compute_" + cursor + "_" + termParts[i] + "_" + termParts[i + 1]);
 				} catch (IOException e) {
-					// TODO Handle node failure - rollback?
+					
 				}
 
 				if (tempResult != null) {
@@ -211,8 +211,6 @@ public class ClientHandler implements Runnable {
 				// Jump to the next operation
 				i++;
 			}
-
-			// TODO Roll back all changes if a node failed
 
 			// Decrement the user calculating by the number of credits paid
 			userMap.get(input[1]).decCredits(usedCredits);

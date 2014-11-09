@@ -49,7 +49,6 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	private NodeConcurrentHashMap nodeMap;
 
 	// Thread pool
-	// TODO Declare pool as a Singleton?
 	private final ExecutorService pool;
 
 	// Server utilities

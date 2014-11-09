@@ -48,6 +48,12 @@ public class UserConcurrentHashMap extends ConcurrentHashMap<String, UserData> {
 		}
 	}
 
+	/**
+	 * Provides a string representation of this data structure
+	 * 
+	 * @return An unsorted numbered list of the users in the map with the
+	 *         username, online/offline status and number of credits
+	 */
 	public String listUsers() {
 		int counter = 1;
 		String output = "";

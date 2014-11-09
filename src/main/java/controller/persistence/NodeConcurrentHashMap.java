@@ -125,13 +125,18 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 		for (String key : keySet()) {
 			NodeData temp = get(key);
 
-			// TODO Use Date.before/after methods for better readability?
 			if (temp.getLastAlive() + timeoutPeriod <= currentTime) {
 				temp.setAlive(false);
 			}
 		}
 	}
-	
+
+	/**
+	 * Constructs a string representation of this data structure.
+	 * 
+	 * @return A list of nodes with an unsorted numbered list, IP address, port,
+	 *         online/offline status and usage stats
+	 */
 	public String listNodes() {
 		int counter = 1;
 		String output = "";
@@ -142,7 +147,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 					+ "\n";
 			counter++;
 		}
-		
+
 		return output;
 	}
 
