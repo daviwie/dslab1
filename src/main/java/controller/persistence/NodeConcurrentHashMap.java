@@ -7,7 +7,7 @@ import controller.container.NodeData;
 
 @SuppressWarnings("serial")
 public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
-	private final String operations = "+-*/";
+	private final String supported = "+-*/";
 
 	/**
 	 * Updates a specific node. If the node is not already within the
@@ -50,8 +50,8 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	 */
 	private String parseOperations(String original, String newOperations) {
 		for (int i = 0; i < newOperations.length(); i++) {
-			char c = operations.charAt(i);
-			if (operations.indexOf(c) >= 0 && original.indexOf(c) < 0) {
+			char c = newOperations.charAt(i);
+			if (supported.indexOf(c) >= 0 && original.indexOf(c) < 0) {
 				original += newOperations.charAt(i);
 			}
 		}
