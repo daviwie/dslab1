@@ -40,21 +40,30 @@ public class ClientHandler implements Runnable {
 			// Read client requests
 			while ((request = reader.readLine()) != null) {
 				String parts[] = request.split("_");
+				for (String s : parts) {
+					System.out.println(s);
+				}
 
 				switch (parts[0]) {
 
 				case "login":
 					writer.println(login(parts));
+					break;
 				case "logout":
 					writer.println(logout(parts));
+					break;
 				case "credits":
 					writer.println(credits(parts));
+					break;
 				case "buy":
 					writer.println(buy(parts));
+					break;
 				case "list":
 					writer.println(list(parts));
+					break;
 				case "compute":
 					writer.println(compute(parts));
+					break;
 				default:
 					writer.println("Unknown command, please try again with a known command");
 				}
@@ -109,7 +118,14 @@ public class ClientHandler implements Runnable {
 	private String credits(String[] input) {
 //		if (input.length != 2)
 			// return "Error: Invalid input!";
+		System.out.println("In credits");
+		for(String s : input) {
+			System.out.println(s);
+		}
+		System.out.println("done");
+
 		Long credits = userMap.get(input[1]).getCredits();
+		System.out.println(credits);
 		System.out.println(credits);
 
 			return "You have " + userMap.get(input[1]).getCredits()

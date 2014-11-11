@@ -100,7 +100,7 @@ public class Node implements INodeCli, Runnable {
 			// datagramSocket = new DatagramSocket(controllerUdp, inetAddr);
 			
 			// TODO Why doesn't DatagramSocket bind using controllerUdp? 
-			datagramSocket = new DatagramSocket(24000, inetAddr);
+			datagramSocket = new DatagramSocket(24001, inetAddr);
 		} catch (UnknownHostException e) {
 			System.out.println("ERROR in Node Constructor!");
 			System.out.println(e.getMessage());
@@ -117,6 +117,7 @@ public class Node implements INodeCli, Runnable {
 
 	@Override
 	public void run() {
+		// Declare serverSocket!
 		ControllerListener cL = new ControllerListener(serverSocket, pool, node);
 		pool.execute(cL);
 
