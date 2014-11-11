@@ -60,6 +60,7 @@ public class UserConcurrentHashMap extends ConcurrentHashMap<String, UserData> {
 
 		for (String key : keySet()) {
 			output += counter + ". " + get(key).getUserName() + " " + get(key).stringOnline() + " Credits: " + get(key).getCredits() + "\n";
+			counter++;
 		}
 
 		return output;

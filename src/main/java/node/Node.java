@@ -46,7 +46,7 @@ public class Node implements INodeCli, Runnable {
 	private ExecutorService pool;
 	private NodeAttr node;
 	private ServerSocket serverSocket;
-	
+
 	private Timer aliveTimer;
 	private AliveTimerTask aliveTimerTask;
 
@@ -60,7 +60,8 @@ public class Node implements INodeCli, Runnable {
 	 * @param userResponseStream
 	 *            the output stream to write the console output to
 	 */
-	public Node(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
+	public Node(String componentName, Config config,
+			InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
 		this.config = config;
 		this.userRequestStream = userRequestStream;
@@ -73,8 +74,15 @@ public class Node implements INodeCli, Runnable {
 		nodeAlive = config.getInt("node.alive");
 		operators = config.getString("node.operators");
 
-		node = new NodeAttr(Integer.parseInt(componentName.substring(componentName.length() - 1)), operators, logDir, tcpPort, controllerHost,
-				controllerUdp, nodeAlive);
+		try {
+			serverSocket = new ServerSocket(tcpPort);
+		} catch (IOException e1) {
+			System.out.println(e1.getMessage());
+		}
+
+		node = new NodeAttr(Integer.parseInt(componentName
+				.substring(componentName.length() - 1)), operators, logDir,
+				tcpPort, controllerHost, controllerUdp, nodeAlive);
 
 		operatorA = new char[operators.length()];
 		for (int i = 0; i < operators.length(); i++) {
@@ -82,31 +90,38 @@ public class Node implements INodeCli, Runnable {
 		}
 
 		pool = Executors.newCachedThreadPool();
-		
+
 		InetAddress inetAddr = null;
 		DatagramSocket datagramSocket = null;
 		try {
-			inetAddr = InetAddress.getByName(controllerHost);
-			datagramSocket = new DatagramSocket(controllerUdp, inetAddr);
+			// inetAddr = InetAddress.getByName(controllerHost);
+			inetAddr = InetAddress.getLocalHost();
+
+			// datagramSocket = new DatagramSocket(controllerUdp, inetAddr);
+			
+			// TODO Why doesn't DatagramSocket bind using controllerUdp? 
+			datagramSocket = new DatagramSocket(24000, inetAddr);
 		} catch (UnknownHostException e) {
 			System.out.println("ERROR in Node Constructor!");
 			System.out.println(e.getMessage());
 		} catch (SocketException e) {
 			System.out.println("ERROR in Node Constructor!");
+			e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
-		
+
 		aliveTimer = new Timer();
-		aliveTimerTask = new AliveTimerTask(datagramSocket, controllerHost, controllerUdp, operators);
+		aliveTimerTask = new AliveTimerTask(datagramSocket, controllerHost,
+				controllerUdp, operators);
 	}
 
 	@Override
 	public void run() {
 		ControllerListener cL = new ControllerListener(serverSocket, pool, node);
 		pool.execute(cL);
-		
+
 		aliveTimer.scheduleAtFixedRate(aliveTimerTask, 0, nodeAlive);
-		
+
 		shell = new Shell(componentName, userRequestStream, userResponseStream);
 		shell.register(this);
 		new Thread(shell).start();
@@ -116,14 +131,14 @@ public class Node implements INodeCli, Runnable {
 	@Command
 	public String exit() throws IOException {
 		String output = "";
-		
+
 		aliveTimer.cancel();
-		
+
 		shell.close();
 		serverSocket.close();
 		userResponseStream.close();
 		userRequestStream.close();
-		
+
 		/*
 		 * Disable new tasks from being submitted to either pool
 		 */
@@ -143,7 +158,7 @@ public class Node implements INodeCli, Runnable {
 			// Preserve interrupt status
 			Thread.currentThread().interrupt();
 		}
-		
+
 		return output + "Closing " + componentName + " down...";
 	}
 
@@ -152,7 +167,8 @@ public class Node implements INodeCli, Runnable {
 	public String history(int numberOfRequests) throws IOException {
 		String output = "";
 
-		for (int i = node.getHistory().size() - 1; i >= (node.getHistory().size() - numberOfRequests); i--) {
+		for (int i = node.getHistory().size() - 1; i >= (node.getHistory()
+				.size() - numberOfRequests); i--) {
 			output += node.getHistory().get(i) + "\n";
 		}
 
@@ -165,7 +181,8 @@ public class Node implements INodeCli, Runnable {
 	 *            which also represents the name of the configuration
 	 */
 	public static void main(String[] args) {
-		Node node = new Node(args[0], new Config(args[0]), System.in, System.out);
+		Node node = new Node(args[0], new Config(args[0]), System.in,
+				System.out);
 		new Thread(node).start();
 	}
 
