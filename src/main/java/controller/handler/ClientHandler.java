@@ -38,9 +38,6 @@ public class ClientHandler implements Runnable {
 			// Read client requests
 			while ((request = reader.readLine()) != null) {
 				String parts[] = request.split("_");
-				for (String s : parts) {
-					System.out.println(s);
-				}
 
 				switch (parts[0]) {
 
