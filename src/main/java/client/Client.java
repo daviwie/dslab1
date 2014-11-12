@@ -15,7 +15,6 @@ import util.Config;
 public class Client implements IClientCli, Runnable {
 
 	private String componentName;
-	@SuppressWarnings("unused")
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
@@ -48,8 +47,8 @@ public class Client implements IClientCli, Runnable {
 		this.userRequestStream = userRequestStream;
 		this.userResponseStream = userResponseStream;
 
-		this.controllerHost = config.getString("controller.host");
-		this.controllerTcpPort = config.getInt("controller.tcp.port");
+		this.controllerHost = this.config.getString("controller.host");
+		this.controllerTcpPort = this.config.getInt("controller.tcp.port");
 
 		try {
 			/*
