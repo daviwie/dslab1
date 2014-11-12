@@ -25,12 +25,11 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	 *            The operations that a node supports, these are sent with the
 	 *            UDP datagram
 	 */
-	@SuppressWarnings("unused")
 	public void update(String ipAddr, Integer tcpPort, String operations) {
 		String id = ipAddr + ":" + tcpPort.intValue();
 		NodeData node = get(id);
 
-		if (id == null)
+		if (node == null)
 			put(id, new NodeData(ipAddr, tcpPort, operations));
 		else {
 			node.setOperations(parseOperations("", operations));
