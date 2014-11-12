@@ -29,6 +29,8 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	private Config controllerConfig;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
+	
+	// TODO Change ports back to dslab456 in client, controller and node1 props.
 
 	/*
 	 * Everything past this point in variables was not part of the original

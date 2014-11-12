@@ -23,8 +23,7 @@ public class ClientHandler implements Runnable {
 	private UserConcurrentHashMap userMap;
 	private NodeConcurrentHashMap nodeMap;
 
-	public ClientHandler(Socket socket, UserConcurrentHashMap userMap,
-			NodeConcurrentHashMap nodeMap) {
+	public ClientHandler(Socket socket, UserConcurrentHashMap userMap, NodeConcurrentHashMap nodeMap) {
 		this.socket = socket;
 		this.userMap = userMap;
 		this.nodeMap = nodeMap;
@@ -33,8 +32,7 @@ public class ClientHandler implements Runnable {
 	@Override
 	public void run() {
 		try {
-			reader = new BufferedReader(new InputStreamReader(
-					socket.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream(), true);
 
 			// Read client requests
@@ -66,6 +64,7 @@ public class ClientHandler implements Runnable {
 					break;
 				default:
 					writer.println("Unknown command, please try again with a known command");
+					break;
 				}
 
 			}
@@ -116,20 +115,10 @@ public class ClientHandler implements Runnable {
 	 * @return The client's current credits
 	 */
 	private String credits(String[] input) {
-//		if (input.length != 2)
-			// return "Error: Invalid input!";
-		System.out.println("In credits");
-		for(String s : input) {
-			System.out.println(s);
-		}
-		System.out.println("done");
+		if (input.length != 2)
+			return "Error: Invalid input!";
 
-		Long credits = userMap.get(input[1]).getCredits();
-		System.out.println(credits);
-		System.out.println(credits);
-
-			return "You have " + userMap.get(input[1]).getCredits()
-					+ " credits.";
+		return "You have " + userMap.get(input[1]).getCredits() + " credits.";
 	}
 
 	/**
@@ -144,8 +133,7 @@ public class ClientHandler implements Runnable {
 			return "Error: Invalid input!";
 
 		userMap.get(input[1]).buyCredits(Long.parseLong(input[2]));
-		return "You now have " + userMap.get(input[1]).getCredits()
-				+ " credits.";
+		return "You now have " + userMap.get(input[1]).getCredits() + " credits.";
 	}
 
 	/**
@@ -208,8 +196,7 @@ public class ClientHandler implements Runnable {
 				String tempResult = null;
 
 				try {
-					tempResult = sendToNode(node, "compute_" + cursor + "_"
-							+ termParts[i] + "_" + termParts[i + 1]);
+					tempResult = sendToNode(node, "compute_" + cursor + "_" + termParts[i] + "_" + termParts[i + 1]);
 				} catch (IOException e) {
 
 				}
@@ -221,8 +208,7 @@ public class ClientHandler implements Runnable {
 					 */
 					cursor = Integer.parseInt(tempResult);
 					// Increase node usage after successful calculation
-					nodeMap.get(node.getKey()).incUsage(
-							50 * tempResult.length());
+					nodeMap.get(node.getKey()).incUsage(50 * tempResult.length());
 				} else {
 					/*
 					 * Calculation failed, node set to offline and credits
@@ -245,13 +231,11 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	private String sendToNode(NodeData node, String term)
-			throws UnknownHostException, IOException {
+	private String sendToNode(NodeData node, String term) throws UnknownHostException, IOException {
 		// Open a socket on a node
 		Socket nodeSocket = new Socket(node.getIpAddr(), node.getTcpPort());
 		PrintWriter out = new PrintWriter(nodeSocket.getOutputStream(), true);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				nodeSocket.getInputStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
 
 		// Write to node
 		out.println(term);

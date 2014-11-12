@@ -58,21 +58,27 @@ public class ControllerHandler implements Runnable {
 			switch (input[2]) {
 			case "+":
 				result = String.valueOf(operand1 + operand2);
+				break;
 			case "-":
 				result = String.valueOf(operand1 - operand2);
+				break;
 			case "*":
 				result = String.valueOf(operand1 * operand2);
+				break;
 			case "/":
-				if(operand2 == 0)
+				if (operand2 == 0) {
 					return "Error: No division by zero!";
+				}
 				result = String.valueOf(Math.round((float) operand1 / operand2));
+				break;
 			default:
 				result = "Error: Unsupported operation!";
+				break;
 			}
 
 			logger.log(node.getFileDir(), node.getNumber(), operand1 + " " + input[2] + " " + operand2 + " ", result);
 			node.getHistory().add(operand1 + " " + input[2] + " " + operand2 + " = " + result);
-			
+
 			return result;
 		} catch (NumberFormatException e) {
 			return "Error: Input can only contain valid integers!";
