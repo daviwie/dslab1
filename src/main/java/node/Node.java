@@ -98,7 +98,7 @@ public class Node implements INodeCli, Runnable {
 
 		aliveTimer = new Timer();
 		aliveTimerTask = new AliveTimerTask(datagramSocket, controllerHost,
-				controllerUdp, operators);
+				controllerUdp, tcpPort, operators);
 	}
 
 	@Override

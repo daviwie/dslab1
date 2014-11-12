@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 import controller.container.NodeData;
 import controller.persistence.NodeConcurrentHashMap;
@@ -192,11 +191,7 @@ public class ClientHandler implements Runnable {
 				// Set our tempResult
 				String tempResult = null;
 
-				try {
-					tempResult = sendToNode(node, "compute_" + cursor + "_" + termParts[i] + "_" + termParts[i + 1]);
-				} catch (IOException e) {
-
-				}
+				tempResult = sendToNode(node, "compute_" + cursor + "_" + termParts[i] + "_" + termParts[i + 1]);
 
 				if (tempResult != null) {
 					/*
@@ -228,23 +223,32 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	private String sendToNode(NodeData node, String term) throws UnknownHostException, IOException {
+	private String sendToNode(NodeData node, String term) {
 		// Open a socket on a node
-		Socket nodeSocket = new Socket(node.getIpAddr(), node.getTcpPort());
-		PrintWriter out = new PrintWriter(nodeSocket.getOutputStream(), true);
-		BufferedReader in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
+		Socket nodeSocket;
+		PrintWriter out;
+		BufferedReader in;
+		try {
+			nodeSocket = new Socket(node.getIpAddr(), node.getTcpPort());
+			out = new PrintWriter(nodeSocket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(nodeSocket.getInputStream()));
 
-		// Write to node
-		out.println(term);
-		// Get result from node
-		String result = in.readLine();
+			// Write to node
+			out.println(term);
+			// Get result from node
+			String result = in.readLine();
 
-		// Close resources
-		out.close();
-		in.close();
-		nodeSocket.close();
+			// Close resources
+			out.close();
+			in.close();
+			nodeSocket.close();
 
-		return result;
+			return result;
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }

@@ -11,22 +11,24 @@ public class AliveTimerTask extends TimerTask {
 	private String message;
 	private DatagramSocket datagramSocket;
 	private InetAddress inetAddr;
-	private Integer port;
+	private Integer udpPort;
+	private Integer tcpPort;
 
-	public AliveTimerTask(DatagramSocket datagramSocket, String controllerHost, Integer port, String operations) {
+	public AliveTimerTask(DatagramSocket datagramSocket, String controllerHost, Integer udpPort, Integer tcpPort, String operations) {
 		this.datagramSocket = datagramSocket;
 		try {
 			inetAddr = InetAddress.getByName(controllerHost);
 		} catch (UnknownHostException e) {
 			System.out.println(e.getMessage());
 		}
-		this.port = port;
-		message = "alive " + port + " " + operations;
+		this.udpPort = udpPort;
+		this.tcpPort = tcpPort;
+		message = "alive " + this.tcpPort + " " + operations;
 	}
 
 	@Override
 	public void run() {
-		DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, inetAddr, port);
+		DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, inetAddr, udpPort);
 		try {
 			datagramSocket.send(packet);
 		} catch (IOException e) {
