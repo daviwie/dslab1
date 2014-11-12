@@ -6,10 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,17 +65,17 @@ public class Node implements INodeCli, Runnable {
 		this.userRequestStream = userRequestStream;
 		this.userResponseStream = userResponseStream;
 
-		logDir = config.getString("log.dir");
-		tcpPort = config.getInt("tcp.port");
-		controllerHost = config.getString("controller.host");
-		controllerUdp = config.getInt("controller.udp.port");
-		nodeAlive = config.getInt("node.alive");
-		operators = config.getString("node.operators");
+		logDir = this.config.getString("log.dir");
+		tcpPort = this.config.getInt("tcp.port");
+		controllerHost = this.config.getString("controller.host");
+		controllerUdp = this.config.getInt("controller.udp.port");
+		nodeAlive = this.config.getInt("node.alive");
+		operators = this.config.getString("node.operators");
 
 		try {
 			serverSocket = new ServerSocket(tcpPort);
-		} catch (IOException e1) {
-			System.out.println(e1.getMessage());
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
 		}
 
 		node = new NodeAttr(Integer.parseInt(componentName
@@ -91,22 +89,10 @@ public class Node implements INodeCli, Runnable {
 
 		pool = Executors.newCachedThreadPool();
 
-		InetAddress inetAddr = null;
 		DatagramSocket datagramSocket = null;
-		try {
-			// inetAddr = InetAddress.getByName(controllerHost);
-			inetAddr = InetAddress.getLocalHost();
-
-			// datagramSocket = new DatagramSocket(controllerUdp, inetAddr);
-			
-			// TODO Why doesn't DatagramSocket bind using controllerUdp? 
-			datagramSocket = new DatagramSocket(24001, inetAddr);
-		} catch (UnknownHostException e) {
-			System.out.println("ERROR in Node Constructor!");
-			System.out.println(e.getMessage());
+		try { 
+			datagramSocket = new DatagramSocket(null);
 		} catch (SocketException e) {
-			System.out.println("ERROR in Node Constructor!");
-			e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
 
@@ -117,7 +103,6 @@ public class Node implements INodeCli, Runnable {
 
 	@Override
 	public void run() {
-		// Declare serverSocket!
 		ControllerListener cL = new ControllerListener(serverSocket, pool, node);
 		pool.execute(cL);
 
