@@ -199,8 +199,15 @@ public class ClientHandler implements Runnable {
 					 * null so semi-recursion can continue
 					 */
 					cursor = Integer.parseInt(tempResult);
-					// Increase node usage after successful calculation
-					nodeMap.get(node.getKey()).incUsage(50 * tempResult.length());
+
+					/*
+					 * Increase node usage after successful calculation, check
+					 * if negative first
+					 */
+					if (tempResult.startsWith("-"))
+						nodeMap.get(node.getKey()).incUsage(50 * (tempResult.length() - 1));
+					else
+						nodeMap.get(node.getKey()).incUsage(50 * tempResult.length());
 				} else {
 					/*
 					 * Calculation failed, node set to offline and credits

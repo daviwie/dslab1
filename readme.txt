@@ -1,18 +1,15 @@
 Reflect about your solution!
 
-Summary (per 9 November 2014):
-- The assignment has required a great deal of my time and been the cause of many a great headache, however, I am almost finished
-- Problems:
-	- When running the JUnit Test I receive an error message from an Exception that the address is already in use and cannot be bound
-	- My TimerTask extended classes throw NullPointer Exceptions, likely due to a failed network connection of some kind
-	- Combined with SEPM and my job, it's been very difficult to find sessions where I can devote multiple hours at one time to the problem
-	- There MIGHT be some issues with synchronization in the current state, but I doubt it
-- Positives:
-	- The program does actually run and doesn't create issues other than these failed TimerTasks and some kind of a network issue
-- Moving forward: 
-	- On Tuesday (11 November) I will be in the DSLab to try and get some guidance on fixing my solution
-- Learned
-	- The idea of reading/writing to a socket was difficult at first to comprehend, but is now clear
-	- Synchronization is something that requires a great deal of thought to avoid deadlocks, how something like this is done at a larger scale is near impossible to comprehend
-	- Communicating with strings was very annoying but turned out to be not much of a problem
-	- How to better time manage when learning a new technology, especially something as abstract as distribution and multi-threading
+Description of controller package: 
+- container: contains a container for Node and a container for User. These contain the various attributes relevant to a User (Client) or a Node.
+- handler: contains a ClientHandler that processes all client input in its own thread
+- listener: ClientListener listens on a TCP port for any incoming connections and creates a ClientHandler for each new connection and runs each handler in its own thread. NodeUDPListener receives all DatagramPackets from the Nodes and builds the alive list.
+- persistence: contains custom ConcurrentHashMaps for Nodes and Users that save the NodeData and UserData and provide some custom methods for each
+- timer: checks to see if any nodes have gone offline
+
+Description of node package:
+- container: similar to the Node container in CloudController, this class contains the attributes relevant for a node to make exchanging of data easier
+- handler: processes all input from the ClientHandler, which is managed by the CloudController
+- listener: listens for any incoming TCP requests from the ClientHandler and creates a ControllerHandler to process the input
+- logger: outputs log files of each node's respective activities
+- timer: sends DatagramPackets via UDP to the CloudController at regular intervals to inform the CloudController it is alive and on what TCP port it is listening

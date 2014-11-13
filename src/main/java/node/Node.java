@@ -58,8 +58,7 @@ public class Node implements INodeCli, Runnable {
 	 * @param userResponseStream
 	 *            the output stream to write the console output to
 	 */
-	public Node(String componentName, Config config,
-			InputStream userRequestStream, PrintStream userResponseStream) {
+	public Node(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
 		this.config = config;
 		this.userRequestStream = userRequestStream;
@@ -78,9 +77,8 @@ public class Node implements INodeCli, Runnable {
 			System.out.println(e.getMessage());
 		}
 
-		node = new NodeAttr(Integer.parseInt(componentName
-				.substring(componentName.length() - 1)), operators, logDir,
-				tcpPort, controllerHost, controllerUdp, nodeAlive);
+		node = new NodeAttr(Integer.parseInt(componentName.substring(componentName.length() - 1)), operators, logDir, tcpPort, controllerHost,
+				controllerUdp, nodeAlive);
 
 		operatorA = new char[operators.length()];
 		for (int i = 0; i < operators.length(); i++) {
@@ -90,15 +88,14 @@ public class Node implements INodeCli, Runnable {
 		pool = Executors.newCachedThreadPool();
 
 		DatagramSocket datagramSocket = null;
-		try { 
+		try {
 			datagramSocket = new DatagramSocket(null);
 		} catch (SocketException e) {
 			System.out.println(e.getMessage());
 		}
 
 		aliveTimer = new Timer();
-		aliveTimerTask = new AliveTimerTask(datagramSocket, controllerHost,
-				controllerUdp, tcpPort, operators);
+		aliveTimerTask = new AliveTimerTask(datagramSocket, controllerHost, controllerUdp, tcpPort, operators);
 	}
 
 	@Override
@@ -153,9 +150,13 @@ public class Node implements INodeCli, Runnable {
 	public String history(int numberOfRequests) throws IOException {
 		String output = "";
 
-		for (int i = node.getHistory().size() - 1; i >= (node.getHistory()
-				.size() - numberOfRequests); i--) {
-			output += node.getHistory().get(i) + "\n";
+		if (node.getHistory().size() == 0)
+			return "No operations have been done on this node.";
+		else if (node.getHistory().size() < numberOfRequests)
+			numberOfRequests = node.getHistory().size();
+
+		for (int i = node.getHistory().size() - 1; i >= (node.getHistory().size() - numberOfRequests); i--) {
+			output += (i + 1) + ". " + node.getHistory().get(i) + "\n";
 		}
 
 		return output;
@@ -167,8 +168,7 @@ public class Node implements INodeCli, Runnable {
 	 *            which also represents the name of the configuration
 	 */
 	public static void main(String[] args) {
-		Node node = new Node(args[0], new Config(args[0]), System.in,
-				System.out);
+		Node node = new Node(args[0], new Config(args[0]), System.in, System.out);
 		new Thread(node).start();
 	}
 
