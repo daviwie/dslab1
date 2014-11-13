@@ -152,8 +152,10 @@ public class Node implements INodeCli, Runnable {
 
 		if (node.getHistory().size() == 0)
 			return "No operations have been done on this node.";
-		else if (node.getHistory().size() < numberOfRequests)
+		else if (node.getHistory().size() < numberOfRequests) {
+			output += "There have  only been " + node.getHistory().size() + " so far: \n";
 			numberOfRequests = node.getHistory().size();
+		}
 
 		for (int i = node.getHistory().size() - 1; i >= (node.getHistory().size() - numberOfRequests); i--) {
 			output += (i + 1) + ". " + node.getHistory().get(i) + "\n";
