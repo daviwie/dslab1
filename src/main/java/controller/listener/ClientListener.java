@@ -8,31 +8,35 @@ import controller.handler.ClientHandler;
 import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.UserConcurrentHashMap;
 
+/**
+ * Listens on a ServerSocket for any incoming connections from a Client. 
+ *
+ */
 public class ClientListener implements Runnable {
 	private ServerSocket serverSocket;
 	private final ExecutorService pool;
 	private boolean isStopped = false;
 	private UserConcurrentHashMap userMap;
 	private NodeConcurrentHashMap nodeMap;
-	
+
 	public ClientListener(ServerSocket serverSocket, UserConcurrentHashMap userMap, NodeConcurrentHashMap nodeMap, ExecutorService pool) {
 		this.serverSocket = serverSocket;
 		this.userMap = userMap;
 		this.nodeMap = nodeMap;
-		this.pool =  pool;
+		this.pool = pool;
 	}
-	
+
 	private boolean isStopped() {
 		return isStopped;
 	}
 
-	public void run() {		
+	public void run() {
 		while (!isStopped()) {
 			try {
 				ClientHandler client = new ClientHandler(serverSocket.accept(), userMap, nodeMap);
 				pool.execute(client);
-				
-				if(isStopped()) {
+
+				if (isStopped()) {
 					close();
 				}
 			} catch (IOException e) {
@@ -40,12 +44,12 @@ public class ClientListener implements Runnable {
 				System.out.println(e.getMessage());
 			}
 		}
-		
-		if(isStopped()) {
+
+		if (isStopped()) {
 			close();
 		}
 	}
-	
+
 	public void close() {
 		try {
 			serverSocket.close();
@@ -54,5 +58,5 @@ public class ClientListener implements Runnable {
 		}
 		pool.shutdownNow();
 	}
-	
+
 }

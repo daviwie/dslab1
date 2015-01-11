@@ -5,25 +5,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import controller.container.NodeData;
 
+/**
+ * Extends a ConcurrentHashMap and provides additional functionality necessary to the management of a Node within the CloudController. 
+ *
+ */
 @SuppressWarnings("serial")
 public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	private final String supported = "+-*/";
 
 	/**
-	 * Updates a specific node. If the node is not already within the
-	 * ConcurrentHashMap then the node is added and its status is set to be
-	 * online (under the assumption that this method is called whenever a UDP
-	 * datagram is received from a node.
+	 * Updates a specific node. If the node is not already within the ConcurrentHashMap then the node is added and its status is set to be
+	 * online (under the assumption that this method is called whenever a UDP datagram is received from a node.
 	 * 
-	 * @param ipAddr
-	 *            The node's IP address - the first part of its unique
-	 *            identifier
-	 * @param tcpPort
-	 *            The node's TCP port sent with the UDP datagram - the second
-	 *            part of its unique identifier
-	 * @param operations
-	 *            The operations that a node supports, these are sent with the
-	 *            UDP datagram
+	 * @param ipAddr The node's IP address - the first part of its unique identifier
+	 * @param tcpPort The node's TCP port sent with the UDP datagram - the second part of its unique identifier
+	 * @param operations The operations that a node supports, these are sent with the UDP datagram
 	 */
 	public void update(String ipAddr, Integer tcpPort, String operations) {
 		String id = ipAddr + ":" + tcpPort.intValue();
@@ -38,13 +34,10 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	}
 
 	/**
-	 * Adds new operations to a node's already supported operations. In the case
-	 * of a new node the first parameter should be left blank.
+	 * Adds new operations to a node's already supported operations. In the case of a new node the first parameter should be left blank.
 	 * 
-	 * @param original
-	 *            A node's already supported operations
-	 * @param newOperations
-	 *            Potentially new operations
+	 * @param original A node's already supported operations
+	 * @param newOperations Potentially new operations
 	 * @return The completed series of operations that a node can support
 	 */
 	private String parseOperations(String original, String newOperations) {
@@ -59,8 +52,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	}
 
 	/**
-	 * @return Returns all supported operations from nodes that are currently
-	 *         online.
+	 * @return Returns all supported operations from nodes that are currently online.
 	 */
 	public String getOperations() {
 		String result = "";
@@ -77,14 +69,11 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	}
 
 	/**
-	 * Searches through the ConcurrentHashMap and looks for the node that fits
-	 * the best usage conditions, in this case the node with the smallest
-	 * usage/smallest load that also supports the operation.
+	 * Searches through the ConcurrentHashMap and looks for the node that fits the best usage conditions, in this case the node with the
+	 * smallest usage/smallest load that also supports the operation.
 	 * 
-	 * @param operation
-	 *            The operation that needs to be calculated
-	 * @return All of the necessary information for a Node in order to
-	 *         facilitate a connection
+	 * @param operation The operation that needs to be calculated
+	 * @return All of the necessary information for a Node in order to facilitate a connection
 	 */
 	public NodeData getBestNode(String operation) {
 		NodeData result = null;
@@ -105,19 +94,15 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	}
 
 	/**
-	 * Checks all nodes in the ConcurrentHashMap as to whether or not they have
-	 * timed out. If so, the node is set to be offline until it sends another
-	 * isAlive UDP datagram. If a Node's lastAlive + timeoutPeriod is less than
-	 * the current time in milliseconds, the Node has timed out.
+	 * Checks all nodes in the ConcurrentHashMap as to whether or not they have timed out. If so, the node is set to be offline until it
+	 * sends another isAlive UDP datagram. If a Node's lastAlive + timeoutPeriod is less than the current time in milliseconds, the Node has
+	 * timed out.
 	 * 
-	 * @param timeoutPeriod
-	 *            The maximum amount of time (in milliseconds) since a Node's
-	 *            lastAlive attribute
+	 * @param timeoutPeriod The maximum amount of time (in milliseconds) since a Node's lastAlive attribute
 	 */
 	public void updateNodeAlive(long timeoutPeriod) {
 		/*
-		 * Empty java.util.Date constructor initializes with the current
-		 * date/time in milliseconds
+		 * Empty java.util.Date constructor initializes with the current date/time in milliseconds
 		 */
 		long currentTime = new Date().getTime();
 
@@ -133,8 +118,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 	/**
 	 * Constructs a string representation of this data structure.
 	 * 
-	 * @return A list of nodes with an unsorted numbered list, IP address, port,
-	 *         online/offline status and usage stats
+	 * @return A list of nodes with an unsorted numbered list, IP address, port, online/offline status and usage stats
 	 */
 	public String listNodes() {
 		int counter = 1;
@@ -142,8 +126,7 @@ public class NodeConcurrentHashMap extends ConcurrentHashMap<String, NodeData> {
 
 		for (String key : keySet()) {
 			NodeData node = get(key);
-			output += counter + ". IP: " + node.getIpAddr() + "Port: " + node.getTcpPort() + " " + node.stringAlive() + " Usage: " + node.getUsage()
-					+ "\n";
+			output += counter + ". IP: " + node.getIpAddr() + "Port: " + node.getTcpPort() + " " + node.stringAlive() + " Usage: " + node.getUsage() + "\n";
 			counter++;
 		}
 

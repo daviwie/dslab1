@@ -12,6 +12,10 @@ import cli.Command;
 import cli.Shell;
 import util.Config;
 
+/**
+ * Provides a thread for a client to access the Cloud Controller and perform calculations.
+ *
+ */
 public class Client implements IClientCli, Runnable {
 
 	private String componentName;
@@ -32,14 +36,10 @@ public class Client implements IClientCli, Runnable {
 	private String currentlyLoggedIn = null;
 
 	/**
-	 * @param componentName
-	 *            the name of the component - represented in the prompt
-	 * @param config
-	 *            the configuration to use
-	 * @param userRequestStream
-	 *            the input stream to read user input from
-	 * @param userResponseStream
-	 *            the output stream to write the console output to
+	 * @param componentName the name of the component - represented in the prompt
+	 * @param config the configuration to use
+	 * @param userRequestStream the input stream to read user input from
+	 * @param userResponseStream the output stream to write the console output to
 	 */
 	public Client(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
@@ -52,8 +52,8 @@ public class Client implements IClientCli, Runnable {
 
 		try {
 			/*
-			 * From user/program perspective, we are outputting data to the
-			 * server and the server is inputting data back to the user/program.
+			 * From user/program perspective, we are outputting data to the server and the server is inputting data back to the
+			 * user/program.
 			 */
 			socket = new Socket(controllerHost, controllerTcpPort);
 			/*
@@ -77,15 +77,11 @@ public class Client implements IClientCli, Runnable {
 	}
 
 	/**
-	 * Attempts to log in a user into the system. If the user is already logged
-	 * in, an appropriate error message is returned. However, if a user is not
-	 * logged in, the input is passed to the system in the form of
-	 * "username_password".
+	 * Attempts to log in a user into the system. If the user is already logged in, an appropriate error message is returned. However, if a
+	 * user is not logged in, the input is passed to the system in the form of "username_password".
 	 * 
-	 * @param username
-	 *            User to be logged into the system
-	 * @param password
-	 *            User password to be checked against username
+	 * @param username User to be logged into the system
+	 * @param password User password to be checked against username
 	 * @return The system's response
 	 * @throws IOException
 	 */
@@ -108,8 +104,7 @@ public class Client implements IClientCli, Runnable {
 	}
 
 	/**
-	 * Logs a user out of the system. If the user is not logged in, an
-	 * appropriate error message is returned. Else the user is logged out.
+	 * Logs a user out of the system. If the user is not logged in, an appropriate error message is returned. Else the user is logged out.
 	 * 
 	 * @return
 	 * @throws IOException
@@ -181,9 +176,8 @@ public class Client implements IClientCli, Runnable {
 	}
 
 	/**
-	 * Sends a term to the system to be calculated. The result is returned. The
-	 * method also checks to make sure that no division by zero is possible. If
-	 * a term contains any division by zero, an error message is returned.
+	 * Sends a term to the system to be calculated. The result is returned. The method also checks to make sure that no division by zero is
+	 * possible. If a term contains any division by zero, an error message is returned.
 	 * 
 	 * @param term
 	 * @return the result of a term
@@ -251,8 +245,7 @@ public class Client implements IClientCli, Runnable {
 	}
 
 	/**
-	 * @param args
-	 *            the first argument is the name of the {@link Client} component
+	 * @param args the first argument is the name of the {@link Client} component
 	 */
 	public static void main(String[] args) {
 		Client client = new Client(args[0], new Config("client"), System.in, System.out);

@@ -9,6 +9,10 @@ import java.net.Socket;
 import node.container.NodeAttr;
 import node.logger.Logger;
 
+/**
+ * Handles all requests sent to a Node from the CloudController. Spawned whenever the CloudController connects via TCP to a Node. 
+ *
+ */
 public class ControllerHandler implements Runnable {
 	private Socket socket;
 	private BufferedReader reader;

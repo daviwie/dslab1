@@ -23,18 +23,21 @@ import controller.timer.AliveTimerTask;
 import cli.Command;
 import cli.Shell;
 
+/**
+ * Handles all communication between Clients and Nodes. Acts as a loud balancer of sorts.
+ *
+ */
 public class CloudController implements ICloudControllerCli, Runnable {
 
 	private String componentName;
 	private Config controllerConfig;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
-	
+
 	// TODO Change ports back to dslab456 in client, controller and node1 props.
 
 	/*
-	 * Everything past this point in variables was not part of the original
-	 * class
+	 * Everything past this point in variables was not part of the original class
 	 */
 	private Shell shell;
 	// Read out config values
@@ -62,14 +65,10 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	private AliveTimerTask aliveTimerTask;
 
 	/**
-	 * @param componentName
-	 *            the name of the component - represented in the prompt
-	 * @param config
-	 *            the configuration to use
-	 * @param userRequestStream
-	 *            the input stream to read user input from
-	 * @param userResponseStream
-	 *            the output stream to write the console output to
+	 * @param componentName the name of the component - represented in the prompt
+	 * @param config the configuration to use
+	 * @param userRequestStream the input stream to read user input from
+	 * @param userResponseStream the output stream to write the console output to
 	 */
 	public CloudController(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
@@ -88,8 +87,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		nodeMap = new NodeConcurrentHashMap();
 
 		/*
-		 * Read out all of the config information for the controller and
-		 * initialize the variables
+		 * Read out all of the config information for the controller and initialize the variables
 		 */
 		tcpPort = controllerConfig.getInt("tcp.port");
 		udpPort = controllerConfig.getInt("udp.port");
@@ -97,8 +95,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		nodeCheckPeriod = controllerConfig.getInt("node.checkPeriod");
 
 		/*
-		 * Read user list from user.properties, build userMap and assign user
-		 * attributes (password, credits)
+		 * Read user list from user.properties, build userMap and assign user attributes (password, credits)
 		 */
 		userConfig = new Config("user");
 		Set<String> userKeys = userConfig.listKeys();
@@ -110,15 +107,15 @@ public class CloudController implements ICloudControllerCli, Runnable {
 			if (!userMap.containsKey(userName)) {
 				UserData user = new UserData();
 				user.setUserName(userName);
-				if(attr.equals("credits"))
-						user.setCredits(userConfig.getInt(userName + "." + attr));
-				if(attr.equals("password"))
+				if (attr.equals("credits"))
+					user.setCredits(userConfig.getInt(userName + "." + attr));
+				if (attr.equals("password"))
 					user.setPassword(userConfig.getString(userName + "." + attr));
 				userMap.put(userName, user);
 			} else {
-				if(attr.equals("credits"))
+				if (attr.equals("credits"))
 					userMap.get(userName).setCredits(userConfig.getInt(userName + "." + attr));
-				if(attr.equals("password"))
+				if (attr.equals("password"))
 					userMap.get(userName).setPassword(userConfig.getString(userName + "." + attr));
 			}
 		}
@@ -147,8 +144,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	@Override
 	public void run() {
 		/*
-		 * Finish setup for CloudController. These instantiations are only
-		 * performed once we're getting underway and need to begin spawning
+		 * Finish setup for CloudController. These instantiations are only performed once we're getting underway and need to begin spawning
 		 * threads.
 		 */
 
@@ -164,10 +160,8 @@ public class CloudController implements ICloudControllerCli, Runnable {
 		aliveTimer.scheduleAtFixedRate(aliveTimerTask, 0, nodeCheckPeriod);
 
 		/*
-		 * Set the shell for the controller last so that way the program can go
-		 * ahead and immediately start listening for connections. Other
-		 * implementation with shell at the start of run seemed to cause strange
-		 * behavior.
+		 * Set the shell for the controller last so that way the program can go ahead and immediately start listening for connections. Other
+		 * implementation with shell at the start of run seemed to cause strange behavior.
 		 */
 		shell = new Shell(componentName, userRequestStream, userResponseStream);
 		shell.register(this);
@@ -236,9 +230,7 @@ public class CloudController implements ICloudControllerCli, Runnable {
 	}
 
 	/**
-	 * @param args
-	 *            the first argument is the name of the {@link CloudController}
-	 *            component
+	 * @param args the first argument is the name of the {@link CloudController} component
 	 */
 	public static void main(String[] args) {
 		CloudController cloudController = new CloudController(args[0], new Config("controller"), System.in, System.out);

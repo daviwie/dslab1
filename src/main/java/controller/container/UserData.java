@@ -1,5 +1,9 @@
 package controller.container;
 
+/**
+ * Encapsulates all of the data relevant about a specific user (Client) necessary for the CloudController. 
+ *
+ */
 public class UserData {
 
 	private String userName;
@@ -14,12 +18,9 @@ public class UserData {
 	/**
 	 * Creates a new user to be stored in UserConcurrentHashMap
 	 * 
-	 * @param userName
-	 *            The username used to log into the system
-	 * @param password
-	 *            The password used to log into the system
-	 * @param credits
-	 *            The credits necessary to compute formulas
+	 * @param userName The username used to log into the system
+	 * @param password The password used to log into the system
+	 * @param credits The credits necessary to compute formulas
 	 */
 	public UserData(String userName, String password, Integer credits) {
 		this.userName = userName;
@@ -78,8 +79,7 @@ public class UserData {
 	/**
 	 * Decrements a user's credits
 	 * 
-	 * @param credits
-	 *            the number of credits to be subtracted from a user
+	 * @param credits the number of credits to be subtracted from a user
 	 */
 	public void decCredits(long credits) {
 		this.credits -= credits;
@@ -88,8 +88,7 @@ public class UserData {
 	/**
 	 * Adds credits to a user's account
 	 * 
-	 * @param credits
-	 *            the number of credits to be added to the user
+	 * @param credits the number of credits to be added to the user
 	 */
 	public void buyCredits(long credits) {
 		this.credits += credits;

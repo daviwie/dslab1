@@ -10,6 +10,11 @@ import controller.container.NodeData;
 import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.UserConcurrentHashMap;
 
+/**
+ * Provides a thread for a Client that handles all input from the Client. These objects are spawned by ClientListener each time a Client
+ * connects to the CloudController via TCP.
+ *
+ */
 public class ClientHandler implements Runnable {
 
 	private Socket socket;
@@ -70,14 +75,10 @@ public class ClientHandler implements Runnable {
 	}
 
 	/**
-	 * Attempts to log user into the system. If unsuccessful, an appropriate
-	 * error message is returned.
+	 * Attempts to log user into the system. If unsuccessful, an appropriate error message is returned.
 	 * 
-	 * @param input
-	 *            user input split into an array of strings
-	 *            login_username_password
-	 * @return A message to the client that is output to the client's shell
-	 *         stating whether or not log in was successful
+	 * @param input user input split into an array of strings login_username_password
+	 * @return A message to the client that is output to the client's shell stating whether or not log in was successful
 	 */
 	private String login(String[] input) {
 		if (input.length != 3)
@@ -87,13 +88,10 @@ public class ClientHandler implements Runnable {
 	}
 
 	/**
-	 * Attempts to log user out of the system. If unsuccessful, an appropriate
-	 * error message is returned.
+	 * Attempts to log user out of the system. If unsuccessful, an appropriate error message is returned.
 	 * 
-	 * @param input
-	 *            user input split into an array of strings logout_username
-	 * @return A message to the client that is output to the client's shell
-	 *         stating whether or not log out was successful
+	 * @param input user input split into an array of strings logout_username
+	 * @return A message to the client that is output to the client's shell stating whether or not log out was successful
 	 */
 	private String logout(String[] input) {
 		if (input.length != 2)
@@ -103,11 +101,9 @@ public class ClientHandler implements Runnable {
 	}
 
 	/**
-	 * Provides the client with the current amount of credits available for
-	 * calculations.
+	 * Provides the client with the current amount of credits available for calculations.
 	 * 
-	 * @param input
-	 *            user input split into an array of strings credits_username
+	 * @param input user input split into an array of strings credits_username
 	 * @return The client's current credits
 	 */
 	private String credits(String[] input) {
@@ -120,8 +116,7 @@ public class ClientHandler implements Runnable {
 	/**
 	 * Adds a specific amount of credits to a user's account.
 	 * 
-	 * @param input
-	 *            user input split into an array of strings buy_username_credits
+	 * @param input user input split into an array of strings buy_username_credits
 	 * @return The client's current credits
 	 */
 	private String buy(String[] input) {
@@ -135,8 +130,7 @@ public class ClientHandler implements Runnable {
 	/**
 	 * Lists all operations supported by the system
 	 * 
-	 * @param input
-	 *            user input split into an array of strings
+	 * @param input user input split into an array of strings
 	 * @return all operations supported by the system
 	 */
 	private String list(String[] input) {
@@ -147,20 +141,14 @@ public class ClientHandler implements Runnable {
 	}
 
 	/**
-	 * Computes a formula as provided by the user. Steps: Check to make sure
-	 * input length is actually valid. Check to see if input contains any divide
-	 * by zero statements. Calculate the potential on credits that will be used
-	 * provided that no node fails. Set the cursor on the first part of $TERM
-	 * and then constructs a miniature term to be sent to the node that is made
-	 * up of two operands and one operator. This mini term is sent to the node,
-	 * calculated and returned. If $TERM has more than one operator, then the
-	 * for loop continues collecting (semi-recursion) and sending the new cursor
-	 * (replaced by the result of the mini term) and another operator and
-	 * operand to the best available node.
+	 * Computes a formula as provided by the user. Steps: Check to make sure input length is actually valid. Check to see if input contains
+	 * any divide by zero statements. Calculate the potential on credits that will be used provided that no node fails. Set the cursor on
+	 * the first part of $TERM and then constructs a miniature term to be sent to the node that is made up of two operands and one operator.
+	 * This mini term is sent to the node, calculated and returned. If $TERM has more than one operator, then the for loop continues
+	 * collecting (semi-recursion) and sending the new cursor (replaced by the result of the mini term) and another operator and operand to
+	 * the best available node.
 	 * 
-	 * @param input
-	 *            user input split into an array of strings
-	 *            compute_username_$TERM
+	 * @param input user input split into an array of strings compute_username_$TERM
 	 * @return the result of the calculation
 	 */
 	private String compute(String[] input) {
@@ -195,14 +183,12 @@ public class ClientHandler implements Runnable {
 
 				if (tempResult != null) {
 					/*
-					 * Replace cursor with the tempResult, provided it is not
-					 * null so semi-recursion can continue
+					 * Replace cursor with the tempResult, provided it is not null so semi-recursion can continue
 					 */
 					cursor = Integer.parseInt(tempResult);
 
 					/*
-					 * Increase node usage after successful calculation, check
-					 * if negative first
+					 * Increase node usage after successful calculation, check if negative first
 					 */
 					if (tempResult.startsWith("-"))
 						nodeMap.get(node.getKey()).incUsage(50 * (tempResult.length() - 1));
@@ -210,8 +196,7 @@ public class ClientHandler implements Runnable {
 						nodeMap.get(node.getKey()).incUsage(50 * tempResult.length());
 				} else {
 					/*
-					 * Calculation failed, node set to offline and credits
-					 * decremented by 50 for failed operation
+					 * Calculation failed, node set to offline and credits decremented by 50 for failed operation
 					 */
 					nodeMap.get(node.getKey()).setAlive(false);
 					usedCredits -= 50;

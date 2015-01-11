@@ -7,6 +7,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.TimerTask;
 
+/**
+ * Sends datagrams via UDP to the CloudController at regular intervals to tell the CloudController that the Node is alive and on what TCP
+ * port to contact a specific Node.
+ *
+ */
 public class AliveTimerTask extends TimerTask {
 	private String message;
 	private DatagramSocket datagramSocket;

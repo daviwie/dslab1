@@ -6,6 +6,10 @@ import java.net.DatagramSocket;
 
 import controller.persistence.NodeConcurrentHashMap;
 
+/**
+ * Listens on UDP for any incoming datagrams from a Node. 
+ *
+ */
 public class NodeUDPListener implements Runnable {
 	private DatagramSocket datagramSocket;
 	private NodeConcurrentHashMap nodeMap;
@@ -27,17 +31,17 @@ public class NodeUDPListener implements Runnable {
 				packet = new DatagramPacket(buffer, buffer.length);
 
 				datagramSocket.receive(packet);
-				
+
 				String nodeIp = packet.getAddress().getHostAddress();
 				String[] parts = new String(packet.getData()).split("\\s+");
-				
-				if(parts[0].equals("alive") && parts.length == 3) {
+
+				if (parts[0].equals("alive") && parts.length == 3) {
 					Integer tcpPort = Integer.parseInt(parts[1]);
 					nodeMap.update(nodeIp, tcpPort, parts[2]);
 				}
 			}
 		} catch (IOException e) {
-			
+
 		}
 
 	}

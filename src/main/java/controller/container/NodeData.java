@@ -2,6 +2,11 @@ package controller.container;
 
 import java.util.Date;
 
+/**
+ * Encapsulates all data relevant for a node within the CloudController. The data is read either from the config files or from the datagrams
+ * received via UDP.
+ *
+ */
 public class NodeData {
 	// Combo of IP and port are used as keys in NodeConcurrentHashMap
 	private final String ipAddr;
@@ -18,7 +23,7 @@ public class NodeData {
 	 * Creates a NodeData object to be stored inside a NodeConcurrentHashMap
 	 * 
 	 * @param ipAddr The IP address where a node can be found
-	 * @param tcpPort The TCP port used to connect 
+	 * @param tcpPort The TCP port used to connect
 	 * @param operations The operations supported by this node
 	 */
 	public NodeData(String ipAddr, Integer tcpPort, String operations) {
@@ -29,7 +34,7 @@ public class NodeData {
 		this.alive = true;
 		this.lastAlive = new Date().getTime();
 	}
-	
+
 	public String getKey() {
 		return getIpAddr() + ":" + getTcpPort();
 	}
@@ -42,8 +47,7 @@ public class NodeData {
 	}
 
 	/**
-	 * @return Get the TCP port of a node. This is sent as a parameter of its
-	 *         isAlive UDP datagram
+	 * @return Get the TCP port of a node. This is sent as a parameter of its isAlive UDP datagram
 	 */
 	public int getTcpPort() {
 		return tcpPort;
@@ -68,8 +72,7 @@ public class NodeData {
 	/**
 	 * Overwrites the usage with the parameter
 	 * 
-	 * @param usage
-	 *            the calculated node usage
+	 * @param usage the calculated node usage
 	 */
 	public synchronized void setUsage(Integer usage) {
 		this.usage = usage;
@@ -83,16 +86,14 @@ public class NodeData {
 	}
 
 	/**
-	 * Updates the node to be online or offline. If the parameter is true then
-	 * the lastAlive is updated with the current Date in milliseconds.
+	 * Updates the node to be online or offline. If the parameter is true then the lastAlive is updated with the current Date in
+	 * milliseconds.
 	 * 
-	 * @param alive
-	 *            if online true, else false
+	 * @param alive if online true, else false
 	 */
 	public synchronized void setAlive(boolean alive) {
 		/*
-		 * Empty java.util.Date constructor initializes with the current
-		 * date/time in milliseconds
+		 * Empty java.util.Date constructor initializes with the current date/time in milliseconds
 		 */
 		if (alive)
 			this.lastAlive = new Date().getTime();
@@ -101,8 +102,7 @@ public class NodeData {
 	}
 
 	/**
-	 * Used primarily in the toString method, but set to public to allow other
-	 * access if necessary.
+	 * Used primarily in the toString method, but set to public to allow other access if necessary.
 	 * 
 	 * @return A string representation of a node's alive/dead state
 	 */
@@ -121,8 +121,7 @@ public class NodeData {
 	}
 
 	/**
-	 * @param operations
-	 *            Sets a node's supported operations
+	 * @param operations Sets a node's supported operations
 	 */
 	public synchronized void setOperations(String operations) {
 		this.operations = operations;
@@ -143,8 +142,8 @@ public class NodeData {
 	}
 
 	/**
-	 * Returns a string representation of a node with IP address, TCP port, its
-	 * online/offline status and its current usage/load (non-Javadoc)
+	 * Returns a string representation of a node with IP address, TCP port, its online/offline status and its current usage/load
+	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Object#toString()
 	 */

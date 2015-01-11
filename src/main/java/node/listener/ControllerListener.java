@@ -7,6 +7,10 @@ import java.util.concurrent.ExecutorService;
 import node.container.NodeAttr;
 import node.handler.ControllerHandler;
 
+/**
+ * Listens for any incoming CloudController connections on a ServerSocket. Whenever the CloudController connects, a ControllerHandler is spawned. 
+ *
+ */
 public class ControllerListener implements Runnable {
 
 	private ServerSocket serverSocket;

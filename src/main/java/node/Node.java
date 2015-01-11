@@ -19,6 +19,11 @@ import node.timer.AliveTimerTask;
 import cli.Command;
 import cli.Shell;
 
+/**
+ * Represents a Node object within the network. All actual calculations are done in ControllerHandler and listens for these requests from
+ * the CloudController in a ControllerListener thread.
+ *
+ */
 public class Node implements INodeCli, Runnable {
 
 	private String componentName;
@@ -27,8 +32,7 @@ public class Node implements INodeCli, Runnable {
 	private PrintStream userResponseStream;
 
 	/*
-	 * Everything past this point in variables was not part of the original
-	 * class
+	 * Everything past this point in variables was not part of the original class
 	 */
 	private Shell shell;
 
@@ -49,14 +53,10 @@ public class Node implements INodeCli, Runnable {
 	private AliveTimerTask aliveTimerTask;
 
 	/**
-	 * @param componentName
-	 *            the name of the component - represented in the prompt
-	 * @param config
-	 *            the configuration to use
-	 * @param userRequestStream
-	 *            the input stream to read user input from
-	 * @param userResponseStream
-	 *            the output stream to write the console output to
+	 * @param componentName the name of the component - represented in the prompt
+	 * @param config the configuration to use
+	 * @param userRequestStream the input stream to read user input from
+	 * @param userResponseStream the output stream to write the console output to
 	 */
 	public Node(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
@@ -77,8 +77,7 @@ public class Node implements INodeCli, Runnable {
 			System.out.println(e.getMessage());
 		}
 
-		node = new NodeAttr(Integer.parseInt(componentName.substring(componentName.length() - 1)), operators, logDir, tcpPort, controllerHost,
-				controllerUdp, nodeAlive);
+		node = new NodeAttr(Integer.parseInt(componentName.substring(componentName.length() - 1)), operators, logDir, tcpPort, controllerHost, controllerUdp, nodeAlive);
 
 		operatorA = new char[operators.length()];
 		for (int i = 0; i < operators.length(); i++) {
@@ -165,9 +164,7 @@ public class Node implements INodeCli, Runnable {
 	}
 
 	/**
-	 * @param args
-	 *            the first argument is the name of the {@link Node} component,
-	 *            which also represents the name of the configuration
+	 * @param args the first argument is the name of the {@link Node} component, which also represents the name of the configuration
 	 */
 	public static void main(String[] args) {
 		Node node = new Node(args[0], new Config(args[0]), System.in, System.out);
