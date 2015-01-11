@@ -9,7 +9,7 @@ import controller.persistence.NodeConcurrentHashMap;
 import controller.persistence.UserConcurrentHashMap;
 
 /**
- * Listens on a ServerSocket for any incoming connections from a Client. 
+ * Listens on a ServerSocket for any incoming connections from a Client.
  *
  */
 public class ClientListener implements Runnable {

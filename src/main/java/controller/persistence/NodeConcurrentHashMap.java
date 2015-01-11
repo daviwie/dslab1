@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import controller.container.NodeData;
 
 /**
- * Extends a ConcurrentHashMap and provides additional functionality necessary to the management of a Node within the CloudController. 
+ * Extends a ConcurrentHashMap and provides additional functionality necessary to the management of a Node within the CloudController.
  *
  */
 @SuppressWarnings("serial")

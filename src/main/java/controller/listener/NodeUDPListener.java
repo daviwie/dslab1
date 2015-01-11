@@ -7,7 +7,7 @@ import java.net.DatagramSocket;
 import controller.persistence.NodeConcurrentHashMap;
 
 /**
- * Listens on UDP for any incoming datagrams from a Node. 
+ * Listens on UDP for any incoming datagrams from a Node.
  *
  */
 public class NodeUDPListener implements Runnable {

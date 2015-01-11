@@ -5,7 +5,7 @@ import java.util.TimerTask;
 import controller.persistence.NodeConcurrentHashMap;
 
 /**
- * Checks to see if a node is alive at regular intervals. 
+ * Checks to see if a node is alive at regular intervals.
  *
  */
 public class AliveTimerTask extends TimerTask {

@@ -79,8 +79,7 @@ public class ScenarioRunner extends BlockJUnit4ClassRunner {
 	 */
 	private void addScenario(Path scenarioDir) {
 		for (Path path : ScenarioUtils.listSteps(scenarioDir)) {
-			Description stepDescription = Description.createTestDescription(getTestClass().getJavaClass().getName(),
-					getBaseName(path.getFileName().toString()));
+			Description stepDescription = Description.createTestDescription(getTestClass().getJavaClass().getName(), getBaseName(path.getFileName().toString()));
 			description.addChild(stepDescription);
 			steps.add(new Step(stepDescription, path));
 		}

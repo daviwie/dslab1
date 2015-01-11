@@ -9,8 +9,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Simulates writing lines to an {@link PrintStream}.
  * <p/>
- * Internally, the lines written to the underlying {@link PrintStream} are buffered and can be retrieved on demand for
- * verification purposes.
+ * Internally, the lines written to the underlying {@link PrintStream} are buffered and can be retrieved on demand for verification
+ * purposes.
  */
 public class TestOutputStream extends PrintStream {
 	private final Queue<String> lines = new LinkedBlockingQueue<>();
@@ -61,7 +61,7 @@ public class TestOutputStream extends PrintStream {
 		} else if (len == 0) {
 			return;
 		}
-		for (int i = 0 ; i < len ; i++) {
+		for (int i = 0; i < len; i++) {
 			write(b[off + i]);
 		}
 	}

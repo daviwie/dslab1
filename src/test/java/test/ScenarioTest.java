@@ -123,8 +123,7 @@ public class ScenarioTest {
 				String[] parts = line.split("[:\\s+]", 2);
 				component = componentMap.get(parts[0]);
 				if (component == null) {
-					throw new IllegalStateException(String.format(
-							"Cannot find component '%s'. Please start it before using it.", parts[0]));
+					throw new IllegalStateException(String.format("Cannot find component '%s'. Please start it before using it.", parts[0]));
 				}
 				component.in.addLine(parts[1].trim());
 				Thread.sleep(500);
@@ -135,12 +134,12 @@ public class ScenarioTest {
 	/**
 	 * Verifies that the output of the recently used component matches a certain condition.
 	 * <p/>
-	 * The data written to the {@link PrintStream} of component is compared against a {@link Matcher} built by the
-	 * expected String and {@link Flag}s. If it does not satisfy the condition, an {@link AssertionError} is thrown
-	 * with the reason and information about the matcher and failing value.
+	 * The data written to the {@link PrintStream} of component is compared against a {@link Matcher} built by the expected String and
+	 * {@link Flag}s. If it does not satisfy the condition, an {@link AssertionError} is thrown with the reason and information about the
+	 * matcher and failing value.
 	 *
 	 * @param expected the condition
-	 * @param flags    the flags defining the type of the matcher.
+	 * @param flags the flags defining the type of the matcher.
 	 */
 	public void verify(String expected, Flag... flags) {
 		List<String> lines = component.out.reset();
@@ -160,10 +159,7 @@ public class ScenarioTest {
 			actual = actual.toLowerCase();
 		}
 
-		String msg = String.format("String must %s%s '%s' but was:%s",
-				contains(Flag.NOT, (Object[]) flags) ? "NOT " : "",
-				contains(Flag.REGEX, (Object[]) flags) ? "match pattern" : "contain",
-				expected,
+		String msg = String.format("String must %s%s '%s' but was:%s", contains(Flag.NOT, (Object[]) flags) ? "NOT " : "", contains(Flag.REGEX, (Object[]) flags) ? "match pattern" : "contain", expected,
 				lines.size() > 1 ? "\n" + actual : String.format(" '%s'", actual));
 
 		matcher = contains(Flag.NOT, (Object[]) flags) ? CoreMatchers.not(matcher) : matcher;

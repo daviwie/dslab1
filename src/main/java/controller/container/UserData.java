@@ -1,7 +1,7 @@
 package controller.container;
 
 /**
- * Encapsulates all of the data relevant about a specific user (Client) necessary for the CloudController. 
+ * Encapsulates all of the data relevant about a specific user (Client) necessary for the CloudController.
  *
  */
 public class UserData {

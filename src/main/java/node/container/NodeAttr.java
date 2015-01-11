@@ -3,7 +3,7 @@ package node.container;
 import java.util.ArrayList;
 
 /**
- * Provides a container for all of the attributes of a Node relevant to that specific Node. 
+ * Provides a container for all of the attributes of a Node relevant to that specific Node.
  *
  */
 public class NodeAttr {
